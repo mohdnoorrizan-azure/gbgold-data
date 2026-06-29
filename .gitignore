@@ -1,0 +1,11 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.deep-copilot/
+.vscode/
+.idea/
+
+# Zip files
+*.zip
