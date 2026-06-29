@@ -1,18 +1,23 @@
 /* GBGold Sales Analysis Dashboard Style Sheet (Light Mode) */
 
-/* --- Design System & CSS Variables --- */
+/* --- Design System & CSS Variables (GBGold Brand) --- */
 :root {
-    --bg-main: #f8fafc;
-    --bg-card: rgba(255, 255, 255, 0.85);
-    --bg-card-hover: rgba(255, 255, 255, 0.95);
-    --border-color: rgba(15, 23, 42, 0.08);
-    --border-color-focus: rgba(217, 119, 6, 0.4);
+    --bg-main: #FEF4ED;
+    --bg-card: rgba(255, 255, 255, 0.88);
+    --bg-card-hover: rgba(255, 255, 255, 0.96);
+    --border-color: rgba(143, 29, 56, 0.08);
+    --border-color-focus: rgba(184, 150, 13, 0.5);
     
-    /* Brand Colors */
-    --gold: #d97706; /* Darker gold for better contrast on white */
-    --gold-dark: #b45309;
-    --gold-light: #fef3c7;
-    --gold-gradient: linear-gradient(135deg, #fbbf24, #d97706);
+    /* Brand Colors - GBGold */
+    --crimson: #8F1D38;
+    --crimson-dark: #6b1529;
+    --crimson-light: #f8e4e9;
+    --crimson-gradient: linear-gradient(135deg, #b82e50, #8F1D38);
+    
+    --gold: #B8960D;
+    --gold-dark: #96790a;
+    --gold-light: #fef8e1;
+    --gold-gradient: linear-gradient(135deg, #d4af37, #B8960D);
     
     /* Accent Colors */
     --blue: #0284c7;
@@ -24,22 +29,23 @@
     --purple: #7c3aed;
     --purple-gradient: linear-gradient(135deg, #c084fc, #9333ea);
     
-    --danger: #dc2626;
-    --danger-gradient: linear-gradient(135deg, #f87171, #dc2626);
+    --danger: #8F1D38;
+    --danger-gradient: linear-gradient(135deg, #b82e50, #8F1D38);
     
     /* Text Colors */
-    --text-main: #0f172a;
-    --text-muted: #64748b;
-    --text-dark: #0f172a;
+    --text-main: #2A2A2A;
+    --text-muted: #6b5e5e;
+    --text-dark: #2A2A2A;
     
-    /* Font */
-    --font-sans: 'Outfit', sans-serif;
+    /* Fonts */
+    --font-heading: 'Cinzel', serif;
+    --font-sans: 'Open Sans', sans-serif;
     
     /* Shadows */
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
-    --shadow-gold: 0 10px 25px -5px rgba(217, 119, 6, 0.15), 0 8px 10px -6px rgba(217, 119, 6, 0.15);
+    --shadow-sm: 0 1px 2px 0 rgba(143, 29, 56, 0.04);
+    --shadow-md: 0 4px 6px -1px rgba(143, 29, 56, 0.06), 0 2px 4px -1px rgba(143, 29, 56, 0.03);
+    --shadow-lg: 0 10px 15px -3px rgba(143, 29, 56, 0.08), 0 4px 6px -2px rgba(143, 29, 56, 0.04);
+    --shadow-gold: 0 10px 25px -5px rgba(184, 150, 13, 0.2), 0 8px 10px -6px rgba(184, 150, 13, 0.15);
     
     /* Transitions */
     --transition-fast: 0.15s ease;
@@ -60,9 +66,9 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     background-image: 
-        radial-gradient(at 0% 0%, rgba(251, 191, 36, 0.04) 0px, transparent 50%),
-        radial-gradient(at 50% 0%, rgba(56, 189, 248, 0.02) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(192, 132, 252, 0.02) 0px, transparent 50%);
+        radial-gradient(at 0% 0%, rgba(143, 29, 56, 0.03) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(184, 150, 13, 0.04) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(143, 29, 56, 0.02) 0px, transparent 50%);
     background-attachment: fixed;
     line-height: 1.5;
 }
@@ -79,8 +85,9 @@ body {
 
 /* --- Typography --- */
 h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
     font-weight: 600;
-    letter-spacing: -0.02em;
+    letter-spacing: 0.02em;
 }
 
 /* --- Header Section --- */
@@ -93,6 +100,7 @@ h1, h2, h3, h4, h5, h6 {
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--border-color);
+    border-bottom: 3px solid var(--crimson);
     border-radius: 16px;
     box-shadow: var(--shadow-md);
 }
@@ -107,13 +115,13 @@ h1, h2, h3, h4, h5, h6 {
     width: 48px;
     height: 48px;
     border-radius: 12px;
-    background: var(--gold-gradient);
+    background: var(--crimson-gradient);
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 24px;
     color: #ffffff;
-    box-shadow: 0 4px 14px rgba(217, 119, 6, 0.3);
+    box-shadow: 0 4px 14px rgba(143, 29, 56, 0.3);
 }
 
 .brand-text h1 {
@@ -127,6 +135,7 @@ h1, h2, h3, h4, h5, h6 {
     background: var(--gold-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    font-family: var(--font-heading);
 }
 
 .brand-text p {
@@ -203,14 +212,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-primary {
-    background: var(--gold-gradient);
+    background: var(--crimson-gradient);
     color: #ffffff;
-    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
+    box-shadow: 0 4px 12px rgba(143, 29, 56, 0.3);
 }
 
 .btn-primary:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(217, 119, 6, 0.5);
+    box-shadow: 0 6px 20px rgba(143, 29, 56, 0.5);
 }
 
 .btn-primary:disabled {

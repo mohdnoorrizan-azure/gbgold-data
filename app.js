@@ -693,8 +693,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const labels = filteredData.map(row => formatDateShort(row.date));
         
         // Chart.js Global Config for Premium Light Aesthetic
-        Chart.defaults.color = '#64748b';
-        Chart.defaults.font.family = "'Outfit', sans-serif";
+        Chart.defaults.color = '#6b5e5e';
+        Chart.defaults.font.family = "'Open Sans', sans-serif";
         
         const tooltipConfig = {
             backgroundColor: 'rgba(255, 255, 255, 0.96)',
@@ -728,7 +728,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     {
                         label: 'GBS Purchase',
                         data: filteredData.map(row => row.gbs_sales),
-                        borderColor: '#0284c7',
+                        borderColor: '#8F1D38',
                         backgroundColor: 'transparent',
                         tension: 0.3,
                         borderWidth: 2,
@@ -738,7 +738,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     {
                         label: 'Retail Sales',
                         data: filteredData.map(row => row.ret_sales),
-                        borderColor: '#16a34a',
+                        borderColor: '#B8960D',
                         backgroundColor: 'transparent',
                         tension: 0.3,
                         borderWidth: 2,
@@ -777,16 +777,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     {
                         label: 'GBS Purchase (g)',
                         data: filteredData.map(row => row.gbs_wt),
-                        backgroundColor: 'rgba(2, 132, 223, 0.85)',
-                        borderColor: '#0284c7',
+                        backgroundColor: 'rgba(143, 29, 56, 0.85)',
+                        borderColor: '#8F1D38',
                         borderWidth: 1,
                         borderRadius: 4
                     },
                     {
                         label: 'Retail Sales (g)',
                         data: filteredData.map(row => row.ret_wt),
-                        backgroundColor: 'rgba(22, 163, 74, 0.85)',
-                        borderColor: '#16a34a',
+                        backgroundColor: 'rgba(184, 150, 13, 0.85)',
+                        borderColor: '#B8960D',
                         borderWidth: 1,
                         borderRadius: 4
                     }
@@ -838,16 +838,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     {
                         label: 'GBS Purchase (g)',
                         data: monthlyGbsWt,
-                        backgroundColor: 'rgba(2, 132, 223, 0.85)',
-                        borderColor: '#0284c7',
+                        backgroundColor: 'rgba(143, 29, 56, 0.85)',
+                        borderColor: '#8F1D38',
                         borderWidth: 1,
                         borderRadius: 4
                     },
                     {
                         label: 'Retail Sales (g)',
                         data: monthlyRetWt,
-                        backgroundColor: 'rgba(22, 163, 74, 0.85)',
-                        borderColor: '#16a34a',
+                        backgroundColor: 'rgba(184, 150, 13, 0.85)',
+                        borderColor: '#B8960D',
                         borderWidth: 1,
                         borderRadius: 4
                     }
@@ -891,7 +891,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     {
                         label: 'GBS Purata (RM/g)',
                         data: filteredData.map(row => row.gbs_avg > 0 ? row.gbs_avg : null),
-                        borderColor: '#0284c7',
+                        borderColor: '#8F1D38',
                         backgroundColor: 'transparent',
                         tension: 0.3,
                         spanGaps: true,
@@ -901,7 +901,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     {
                         label: 'Retail Purata (RM/g)',
                         data: filteredData.map(row => row.ret_avg > 0 ? row.ret_avg : null),
-                        borderColor: '#16a34a',
+                        borderColor: '#B8960D',
                         backgroundColor: 'transparent',
                         tension: 0.3,
                         spanGaps: true,
@@ -984,7 +984,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     {
                         label: 'GBS Purata Bulanan (RM/g)',
                         data: monthlyGbsAvg,
-                        borderColor: '#0284c7',
+                        borderColor: '#8F1D38',
                         backgroundColor: 'transparent',
                         tension: 0.3,
                         spanGaps: true,
@@ -995,7 +995,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     {
                         label: 'Retail Purata Bulanan (RM/g)',
                         data: monthlyRetAvg,
-                        borderColor: '#16a34a',
+                        borderColor: '#B8960D',
                         backgroundColor: 'transparent',
                         tension: 0.3,
                         spanGaps: true,
@@ -1087,13 +1087,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     {
                         label: 'GBS Purchase (%)',
                         data: contribGbsPcts,
-                        backgroundColor: 'rgba(2, 132, 223, 0.85)',
+                        backgroundColor: 'rgba(143, 29, 56, 0.85)',
                         borderRadius: 4
                     },
                     {
                         label: 'Retail Sales (%)',
                         data: contribRetPcts,
-                        backgroundColor: 'rgba(22, 163, 74, 0.85)',
+                        backgroundColor: 'rgba(184, 150, 13, 0.85)',
                         borderRadius: 4
                     }
                 ]
@@ -1103,8 +1103,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 afterDatasetsDraw(chart) {
                     const { ctx } = chart;
                     ctx.save();
-                    ctx.font = 'bold 11px \'Outfit\', sans-serif';
-                    ctx.fillStyle = '#475569';
+                    ctx.font = 'bold 11px \'Open Sans\', sans-serif';
+                    ctx.fillStyle = '#2A2A2A';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
 
@@ -1186,13 +1186,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     {
                         label: 'GBS Purchase',
                         data: monthGbsVals,
-                        backgroundColor: 'rgba(2, 132, 223, 0.85)',
+                        backgroundColor: 'rgba(143, 29, 56, 0.85)',
                         borderRadius: 4
                     },
                     {
                         label: 'Retail Sales',
                         data: monthRetVals,
-                        backgroundColor: 'rgba(22, 163, 74, 0.85)',
+                        backgroundColor: 'rgba(184, 150, 13, 0.85)',
                         borderRadius: 4
                     }
                 ]
