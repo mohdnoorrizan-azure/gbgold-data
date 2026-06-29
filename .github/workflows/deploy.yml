@@ -13,9 +13,9 @@ jobs:
         run: |
           echo "Menghantar isyarat webhook ke infogbgold.my..."
           
-          # Hantar request ke WordPress Webhook
-          HTTP_CODE=$(curl -s -o /tmp/sync-response.json -w "%{http_code}" \
-            'https://infogbgold.my/?gbgold_webhook=1&key=gbgold-sync-2026')
+          # Hantar request ke WordPress Webhook (ditukar ke WWW dan ditambah -L untuk mengikut redirect)
+          HTTP_CODE=$(curl -s -L -o /tmp/sync-response.json -w "%{http_code}" \
+            'https://www.infogbgold.my/?gbgold_webhook=1&key=gbgold-sync-2026')
           
           # Semak maklum balas daripada server
           if [ "$HTTP_CODE" = "200" ]; then
