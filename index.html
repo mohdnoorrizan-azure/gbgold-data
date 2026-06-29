@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GBGold | Dashboard Analisis Jualan 2026</title>
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- External Libraries via CDN -->
+    <!-- SheetJS for Excel Reading/Writing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- PapaParse for CSV Parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- Chart.js for beautiful charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar / Brand Header -->
+        <header class="main-header">
+            <div class="brand">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-coins gold-glow"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>GB<span>GOLD</span></h1>
+                    <p>Sistem Analisis Data Jualan</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button id="btn-load-demo" class="btn btn-secondary">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Muat Data Demo
+                </button>
+                <button id="btn-reset" class="btn btn-danger" style="display: none;">
+                    <i class="fa-solid fa-trash-can"></i> Kosongkan Data
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- File Upload Section (Shown when no data is loaded) -->
+            <section id="upload-section" class="card upload-card">
+                <div class="card-header">
+                    <h2><i class="fa-solid fa-file-import gold-text"></i> Muat Naik Fail Data Jualan</h2>
+                    <p>Sila muat naik kedua-dua jenis fail data jualan untuk memulakan analisis jualan 2026.</p>
+                </div>
+                <div class="upload-grid">
+                    <!-- GBS Purchase Upload -->
+                    <div class="upload-box" id="drop-zone-gbs">
+                        <input type="file" id="file-gbs" accept=".xlsx, .xls, .csv" multiple hidden>
+                        <div class="upload-box-content">
+                            <div class="icon-container">
+                                <i class="fa-solid fa-file-invoice-dollar text-primary"></i>
+                            </div>
+                            <h3>1. GBS Purchase Data</h3>
+                            <p class="description">GBS Daily Sales Report (CPO-xxx)</p>
+                            <span class="file-info" id="gbs-file-info">Sila pilih atau tarik satu atau lebih fail ke sini</span>
+                            <button type="button" class="btn btn-outline" onclick="document.getElementById('file-gbs').click()">
+                                Pilih Fail
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Retail Sales Upload -->
+                    <div class="upload-box" id="drop-zone-retail">
+                        <input type="file" id="file-retail" accept=".xlsx, .xls, .csv" multiple hidden>
+                        <div class="upload-box-content">
+                            <div class="icon-container">
+                                <i class="fa-solid fa-store text-success"></i>
+                            </div>
+                            <h3>2. Daily Sales Data</h3>
+                            <p class="description">Retail Daily Sales Report (#xxx, Premium, Shipment)</p>
+                            <span class="file-info" id="retail-file-info">Sila pilih atau tarik satu atau lebih fail ke sini</span>
+                            <button type="button" class="btn btn-outline" onclick="document.getElementById('file-retail').click()">
+                                Pilih Fail
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="upload-actions">
+                    <button id="btn-process" class="btn btn-primary btn-lg" disabled>
+                        <i class="fa-solid fa-circle-play"></i> Proses & Gabung Data
+                    </button>
+                </div>
+            </section>
+
+            <!-- Dashboard Content Section (Hidden until data is loaded) -->
+            <div id="dashboard-view" style="display: none;">
+                <!-- Filter Toolbar -->
+                <section class="toolbar card">
+                    <div class="toolbar-title">
+                        <h3><i class="fa-solid fa-sliders text-gold"></i> Penapis Data 2026</h3>
+                    </div>
+                    <div class="toolbar-filters">
+                        <div class="filter-group">
+                            <label for="filter-start-date">Tarikh Mula:</label>
+                            <input type="date" id="filter-start-date" class="form-control">
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-end-date">Tarikh Tamat:</label>
+                            <input type="date" id="filter-end-date" class="form-control">
+                        </div>
+                        <div class="filter-group select-group">
+                            <label for="filter-month">Pilih Bulan:</label>
+                            <select id="filter-month" class="form-control">
+                                <option value="all">Semua Bulan (2026)</option>
+                                <option value="01">Januari</option>
+                                <option value="02">Februari</option>
+                                <option value="03">Mac</option>
+                                <option value="04">April</option>
+                                <option value="05">Mei</option>
+                                <option value="06">Jun</option>
+                                <option value="07">Julai</option>
+                                <option value="08">Ogos</option>
+                                <option value="09">September</option>
+                                <option value="10">Oktober</option>
+                                <option value="11">November</option>
+                                <option value="12">Disember</option>
+                            </select>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- KPI Cards Grid -->
+                <section class="kpi-grid">
+                    <!-- Total Combined Sales -->
+                    <div class="kpi-card card-glow">
+                        <div class="kpi-icon bg-gold-gradient">
+                            <i class="fa-solid fa-wallet"></i>
+                        </div>
+                        <div class="kpi-details">
+                            <span class="kpi-title">Jumlah Jualan Kasar (Combined)</span>
+                            <h2 id="kpi-total-sales" class="kpi-value">RM 0.00</h2>
+                            <div class="kpi-sub-grid">
+                                <div>GBS: <span id="kpi-sub-gbs-sales" class="sub-val">RM 0</span></div>
+                                <div>Retail: <span id="kpi-sub-retail-sales" class="sub-val">RM 0</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total Gold Weight -->
+                    <div class="kpi-card">
+                        <div class="kpi-icon bg-blue-gradient">
+                            <i class="fa-solid fa-scale-balanced"></i>
+                        </div>
+                        <div class="kpi-details">
+                            <span class="kpi-title">Jumlah Berat Emas</span>
+                            <h2 id="kpi-total-weight" class="kpi-value">0.00 g</h2>
+                            <div class="kpi-sub-grid">
+                                <div>GBS: <span id="kpi-sub-gbs-weight" class="sub-val">0 g</span></div>
+                                <div>Retail: <span id="kpi-sub-retail-weight" class="sub-val">0 g</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Average Gold Price / gram -->
+                    <div class="kpi-card">
+                        <div class="kpi-icon bg-green-gradient">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <div class="kpi-details">
+                            <span class="kpi-title">Purata Jualan Se-gram</span>
+                            <h2 id="kpi-avg-price" class="kpi-value">RM 0.00/g</h2>
+                            <div class="kpi-sub-grid">
+                                <div>GBS: <span id="kpi-sub-gbs-price" class="sub-val">RM 0/g</span></div>
+                                <div>Retail: <span id="kpi-sub-retail-price" class="sub-val">RM 0/g</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total Transactions / Orders -->
+                    <div class="kpi-card">
+                        <div class="kpi-icon bg-purple-gradient">
+                            <i class="fa-solid fa-receipt"></i>
+                        </div>
+                        <div class="kpi-details">
+                            <span class="kpi-title">Jumlah Transaksi & Pesanan</span>
+                            <h2 id="kpi-total-tx" class="kpi-value">0</h2>
+                            <div class="kpi-sub-grid">
+                                <div>GBS Tx: <span id="kpi-sub-gbs-tx" class="sub-val">0</span></div>
+                                <div>Retail Orders: <span id="kpi-sub-retail-tx" class="sub-val">0</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Leaderboard Section -->
+                <section id="leaderboard-section" class="card">
+                    <div class="card-header">
+                        <h2><i class="fa-solid fa-trophy text-gold"></i> Kedudukan Prestasi Bulanan (Ranking 2026)</h2>
+                        <p>Kedudukan bulan terbaik berdasarkan prestasi jualan kasar (RM) dan berat emas yang dikeluarkan (g).</p>
+                    </div>
+                    <div class="leaderboard-grid">
+                        <!-- Sales Leaderboard -->
+                        <div class="leaderboard-col">
+                            <h3><i class="fa-solid fa-medal text-gold"></i> Kedudukan Jualan Kasar (RM)</h3>
+                            <div id="sales-leaderboard-list" class="leaderboard-list">
+                                <!-- Dynamically generated list -->
+                            </div>
+                        </div>
+                        
+                        <!-- Weight Leaderboard -->
+                        <div class="leaderboard-col">
+                            <h3><i class="fa-solid fa-medal text-blue"></i> Kedudukan Berat Emas Dikeluarkan (g)</h3>
+                            <div id="weight-leaderboard-list" class="leaderboard-list">
+                                <!-- Dynamically generated list -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Charts Section -->
+                <section class="charts-grid">
+                    <!-- Chart 1: Sales Performance Trend -->
+                    <div class="card chart-card large-chart">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-chart-area text-gold"></i> Trend Jualan Harian (RM)</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="chart-sales-trend"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 2: Gold Weight Comparison -->
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-weight-hanging text-blue"></i> Perbandingan Berat Emas Dikeluarkan (g)</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="chart-weight-compare"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 2B: Gold Weight Comparison Monthly -->
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-weight-hanging text-blue"></i> Perbandingan Berat Emas Dikeluarkan (g) Bulanan</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="chart-weight-monthly"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 3: Gold Price per Gram Trend -->
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-tags text-green"></i> Harga Emas Purata Se-Gram Harian (RM/g)</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="chart-price-trend"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 3B: Gold Price per Gram Monthly Trend -->
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-tags text-green"></i> Harga Emas Purata Se-Gram Bulanan (RM/g)</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="chart-price-monthly"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 4: Sales Contribution -->
+                    <div class="card chart-card small-chart">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-chart-pie text-purple"></i> Sumbangan Saluran Jualan (%)</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="chart-contribution"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 5: Monthly Breakdown -->
+                    <div class="card chart-card double-chart">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-calendar-days text-gold"></i> Rumusan Jualan Bulanan 2026 (RM)</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="chart-monthly-sales"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Combined Data Table Section -->
+                <section class="card table-card">
+                    <div class="table-header-row">
+                        <div class="table-title">
+                            <h2><i class="fa-solid fa-table text-gold"></i> Data Gabungan Harian (GBS & Retail)</h2>
+                            <p>Menunjukkan padanan data harian bagi tahun 2026</p>
+                        </div>
+                        <div class="table-actions">
+                            <select id="table-filter-month" class="form-control" style="height: 38px; padding-top: 6px; padding-bottom: 6px;">
+                                <option value="all">Semua Bulan</option>
+                                <option value="01">Januari</option>
+                                <option value="02">Februari</option>
+                                <option value="03">Mac</option>
+                                <option value="04">April</option>
+                                <option value="05">Mei</option>
+                                <option value="06">Jun</option>
+                                <option value="07">Julai</option>
+                                <option value="08">Ogos</option>
+                                <option value="09">September</option>
+                                <option value="10">Oktober</option>
+                                <option value="11">November</option>
+                                <option value="12">Disember</option>
+                            </select>
+                            <div class="search-box">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="table-search" placeholder="Cari tarikh...">
+                            </div>
+                            <button id="btn-export-csv" class="btn btn-success-outline">
+                                <i class="fa-solid fa-file-csv"></i> Eksport CSV
+                            </button>
+                            <button id="btn-export-xlsx" class="btn btn-success">
+                                <i class="fa-solid fa-file-excel"></i> Eksport Excel
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="data-table" id="combined-table">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" class="text-center sortable" data-sort="date">Tarikh <i class="fa-solid fa-sort"></i></th>
+                                    <th colspan="4" class="text-center gbs-header-cell">GBS Purchase (CPO)</th>
+                                    <th colspan="5" class="text-center retail-header-cell">Retail Daily Sales (#)</th>
+                                    <th colspan="3" class="text-center combined-header-cell">Jumlah Keseluruhan (Combined)</th>
+                                </tr>
+                                <tr>
+                                    <th class="sortable" data-sort="gbs_tx">Tx <i class="fa-solid fa-sort"></i></th>
+                                    <th class="sortable" data-sort="gbs_wt">Berat (g) <i class="fa-solid fa-sort"></i></th>
+                                    <th class="sortable" data-sort="gbs_sales">Jualan (RM) <i class="fa-solid fa-sort"></i></th>
+                                    <th>Purata (RM/g)</th>
+                                    
+                                    <th class="sortable" data-sort="ret_tx">Pesanan <i class="fa-solid fa-sort"></i></th>
+                                    <th class="sortable" data-sort="ret_wt">Berat (g) <i class="fa-solid fa-sort"></i></th>
+                                    <th class="sortable" data-sort="ret_prem">Premium (RM)</th>
+                                    <th class="sortable" data-sort="ret_sales">Jualan (RM) <i class="fa-solid fa-sort"></i></th>
+                                    <th>Purata (RM/g)</th>
+                                    
+                                    <th class="sortable" data-sort="total_wt">Berat (g) <i class="fa-solid fa-sort"></i></th>
+                                    <th class="sortable" data-sort="total_sales">Jualan (RM) <i class="fa-solid fa-sort"></i></th>
+                                    <th>Purata (RM/g)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                <!-- Data rows will be generated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="table-footer">
+                        <div class="pagination-info" id="pagination-info">
+                            Menunjukkan 0 hingga 0 daripada 0 entri
+                        </div>
+                        <div class="pagination-controls" id="pagination-controls">
+                            <!-- Pagination buttons will be generated dynamically -->
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="main-footer-text">
+            <p>&copy; 2026 GBGold Sales Analysis Dashboard. Direka untuk prestasi tinggi dan keputusan pintar.</p>
+        </footer>
+    </div>
+    
+    <!-- App JavaScript -->
+    <script src="app.js"></script>
+</body>
+</html>
