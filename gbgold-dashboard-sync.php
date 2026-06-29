@@ -16,6 +16,15 @@ if (!defined('ABSPATH')) {
 // Dengar isyarat webhook
 add_action('init', 'gbgold_webhook_listener');
 
+// Daftar Shortcode
+add_shortcode('infogbgold_dashboard', 'gbgold_dashboard_shortcode_render');
+
+function gbgold_dashboard_shortcode_render() {
+    // Parameter masa (?v=...) ditambah untuk mengelakkan cache browser
+    $url = plugin_dir_url(__FILE__) . 'dashboard/index.html?v=' . time();
+    return '<iframe src="' . esc_url($url) . '" width="100%" height="1250px" style="border:none; border-radius:16px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 24px;"></iframe>';
+}
+
 function gbgold_webhook_listener() {
     if (isset($_GET['gbgold_webhook']) && $_GET['gbgold_webhook'] == '1') {
         
@@ -110,7 +119,7 @@ function gbgold_execute_sync() {
     require_once(ABSPATH . 'wp-admin/includes/file.php');
     WP_Filesystem();
     
-    $target_dir = ABSPATH . 'dashboard/'; // Folder sasaran https://infogbgold.my/dashboard/
+    $target_dir = plugin_dir_path(__FILE__) . 'dashboard/'; // Simpan dalam folder plugin sendiri
     
     // Bina folder jika belum wujud
     if (!file_exists($target_dir)) {
