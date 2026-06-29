@@ -1,0 +1,32 @@
+name: Auto Sync GBGold Dashboard -> WordPress
+
+on:
+  push:
+    branches: [ main ] # Trigger apabila push ke branch main
+
+jobs:
+  sync:
+    name: Sync ke WordPress
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger WordPress Webhook
+        run: |
+          echo "Menghantar isyarat webhook ke infogbgold.my..."
+          
+          # Hantar request ke WordPress Webhook
+          HTTP_CODE=$(curl -s -o /tmp/sync-response.json -w "%{http_code}" \
+            'https://infogbgold.my/?gbgold_webhook=1&key=gbgold-sync-2026')
+          
+          # Semak maklum balas daripada server
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Penyelarasan (Sync) berjaya dicetuskan di WordPress!"
+            cat /tmp/sync-response.json
+          elif [ "$HTTP_CODE" = "429" ]; then
+            echo "⏳ Rate limited - Penyelarasan baru sahaja dijalankan kurang dari 60 saat yang lalu."
+          elif [ "$HTTP_CODE" = "403" ]; then
+            echo "❌ Kunci keselamatan (Secret Key) tidak sah!"
+            exit 1
+          else
+            echo "❌ Gagal menyambung ke WordPress (HTTP $HTTP_CODE)"
+            exit 1
+          fi
