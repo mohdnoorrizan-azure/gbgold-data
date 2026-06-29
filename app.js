@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const btnProcess = document.getElementById('btn-process');
     const btnLoadDemo = document.getElementById('btn-load-demo');
+    const btnSaveServer = document.getElementById('btn-save-server');
     const btnReset = document.getElementById('btn-reset');
     
     const uploadSection = document.getElementById('upload-section');
@@ -439,6 +440,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dashboardView.style.display = 'none';
         uploadSection.style.display = 'block';
         btnReset.style.display = 'none';
+        btnSaveServer.style.display = 'none';
     });
 
     btnLoadDemo.addEventListener('click', () => {
@@ -453,6 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
         uploadSection.style.display = 'none';
         dashboardView.style.display = 'flex';
         btnReset.style.display = 'inline-flex';
+        btnSaveServer.style.display = 'inline-flex';
         
         // Set date filter defaults (2026)
         const dates = combinedData.map(d => d.date);
@@ -1576,4 +1579,69 @@ document.addEventListener('DOMContentLoaded', () => {
             current.setDate(current.getDate() + 1);
         }
     }
+
+    // --- Save to Server Event ---
+    btnSaveServer.addEventListener('click', () => {
+        if (combinedData.length === 0) {
+            alert("Tiada data untuk disimpan!");
+            return;
+        }
+
+        const key = prompt("Sila masukkan Kata Laluan Keselamatan untuk menyimpan data ke server:");
+        if (key === null) return; // User cancelled
+        if (!key) {
+            alert("Kata laluan keselamatan diperlukan!");
+            return;
+        }
+
+        // Change button state to loading
+        const originalText = btnSaveServer.innerHTML;
+        btnSaveServer.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+        btnSaveServer.setAttribute('disabled', 'true');
+
+        fetch('save_data.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key: key, data: combinedData })
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res.success) {
+                alert("Berjaya! " + res.message);
+            } else {
+                alert("Gagal: " + res.message);
+            }
+        })
+        .catch(err => {
+            alert("Ralat sambungan ke server: " + err.message);
+        })
+        .finally(() => {
+            btnSaveServer.innerHTML = originalText;
+            btnSaveServer.removeAttribute('disabled');
+        });
+    });
+
+    // --- Autoload Data from Server ---
+    function autoloadData() {
+        fetch('data.json', { cache: 'no-store' }) // Avoid cached empty data
+            .then(res => {
+                if (res.ok) {
+                    return res.json();
+                }
+                throw new Error("Fail data.json tidak dijumpai.");
+            })
+            .then(data => {
+                if (Array.isArray(data) && data.length > 0) {
+                    combinedData = data;
+                    initializeDashboard();
+                    console.log("Data berjaya diautoload dari server.");
+                }
+            })
+            .catch(err => {
+                console.log("Tiada data autoload tersedia:", err.message);
+            });
+    }
+
+    // Run autoload on page load
+    autoloadData();
 });
