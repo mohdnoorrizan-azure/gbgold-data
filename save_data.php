@@ -59,7 +59,7 @@ if (!isset($input['data']) || !is_array($input['data'])) {
     http_response_code(400);
     echo json_encode([
         "success" => false,
-        "message" => "Data jualan tidak sah atau kosong."
+        "message" => "Data tidak sah atau kosong."
     ]);
     exit;
 }
@@ -76,18 +76,23 @@ if ($dataToSave === false) {
     exit;
 }
 
-// Write to data.json
+// Determine file name based on data type (SPA unified api)
 $fileName = 'data.json';
+if (isset($input['type']) && $input['type'] === 'recruitment') {
+    $fileName = 'recruitment_data.json';
+}
+
+// Write to selected file
 if (file_put_contents($fileName, $dataToSave) !== false) {
     echo json_encode([
         "success" => true,
-        "message" => "Data berjaya disimpan ke fail data.json di server!"
+        "message" => "Data berjaya disimpan ke fail " . $fileName . " di server!"
     ]);
 } else {
     http_response_code(500);
     echo json_encode([
         "success" => false,
-        "message" => "Gagal menulis fail data.json. Sila pastikan kebenaran menulis fail (write permissions) telah diberikan untuk folder ini di server."
+        "message" => "Gagal menulis fail " . $fileName . ". Sila pastikan kebenaran menulis fail (write permissions) telah diberikan untuk folder ini di server."
     ]);
 }
 ?>
