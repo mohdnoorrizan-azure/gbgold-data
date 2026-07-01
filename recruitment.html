@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GBGold | Dashboard Analisis Rekrutmen 2026</title>
+    <!-- Google Fonts: Cinzel (Heading) + Open Sans (Body) - GBGold Brand -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Open+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- External Libraries via CDN -->
+    <!-- SheetJS for Excel Reading/Writing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- PapaParse for CSV Parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- Chart.js for beautiful charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Dashboard Switcher Navigation -->
+        <div class="dashboard-switcher" style="display: flex; gap: 12px; margin-bottom: -8px;">
+            <a href="index.html" class="switcher-btn"><i class="fa-solid fa-chart-line"></i> Analisis Jualan</a>
+            <a href="recruitment.html" class="switcher-btn active"><i class="fa-solid fa-users"></i> Analisis Rekrutmen</a>
+        </div>
+
+        <!-- Sidebar / Brand Header -->
+        <header class="main-header">
+            <div class="brand">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-users-line gold-glow"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>GB<span>GOLD</span></h1>
+                    <p>Sistem Analisis Data Rekrutmen</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button id="btn-load-demo" class="btn btn-secondary">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Muat Data Demo
+                </button>
+                <button id="btn-save-server" class="btn btn-primary" style="display: none;">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Simpan ke Server
+                </button>
+                <button id="btn-reset" class="btn btn-danger" style="display: none;">
+                    <i class="fa-solid fa-trash-can"></i> Kosongkan Data
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- File Upload Section (Shown when no data is loaded) -->
+            <section id="upload-section" class="card upload-card">
+                <div class="card-header">
+                    <h2><i class="fa-solid fa-file-import gold-text"></i> Muat Naik Fail Data Rekrutmen</h2>
+                    <p>Sila muat naik laporan Customer Referrals bulanan untuk memulakan analisis rekrutmen 2026.</p>
+                </div>
+                <div class="upload-grid" style="grid-template-columns: 1fr;">
+                    <!-- Recruitment Upload Box -->
+                    <div class="upload-box" id="drop-zone-recruitment" style="padding: 40px 20px;">
+                        <input type="file" id="file-recruitment" accept=".xlsx, .xls, .csv" multiple hidden>
+                        <div class="upload-box-content">
+                            <div class="icon-container" style="background: var(--gold-light); color: var(--gold);">
+                                <i class="fa-solid fa-users-gear text-gold"></i>
+                            </div>
+                            <h3>Customer Referrals Report</h3>
+                            <p class="description">Pilih fail laporan referal bulanan (format Excel atau CSV)</p>
+                            <span class="file-info" id="recruitment-file-info">Sila pilih atau tarik satu atau lebih fail ke sini</span>
+                            <button type="button" class="btn btn-outline" onclick="document.getElementById('file-recruitment').click()">
+                                Pilih Fail
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="upload-actions">
+                    <button id="btn-process" class="btn btn-primary btn-lg" disabled>
+                        <i class="fa-solid fa-circle-play"></i> Proses & Analisis Data
+                    </button>
+                </div>
+            </section>
+
+            <!-- Dashboard Content Section (Hidden until data is loaded) -->
+            <div id="dashboard-view" style="display: none;">
+                <!-- Filter Toolbar -->
+                <section class="toolbar card">
+                    <div class="toolbar-title">
+                        <h3><i class="fa-solid fa-sliders text-gold"></i> Penapis Data Rekrutmen</h3>
+                    </div>
+                    <div class="toolbar-filters">
+                        <div class="filter-group">
+                            <label for="filter-start-date">Tarikh Mula:</label>
+                            <input type="date" id="filter-start-date" class="form-control">
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-end-date">Tarikh Tamat:</label>
+                            <input type="date" id="filter-end-date" class="form-control">
+                        </div>
+                        <div class="filter-group select-group">
+                            <label for="filter-month">Pilih Bulan:</label>
+                            <select id="filter-month" class="form-control">
+                                <option value="all">Semua Bulan (2026)</option>
+                                <option value="01">Januari</option>
+                                <option value="02">Februari</option>
+                                <option value="03">Mac</option>
+                                <option value="04">April</option>
+                                <option value="05">Mei</option>
+                                <option value="06">Jun</option>
+                                <option value="07">Julai</option>
+                                <option value="08">Ogos</option>
+                                <option value="09">September</option>
+                                <option value="10">Oktober</option>
+                                <option value="11">November</option>
+                                <option value="12">Disember</option>
+                            </select>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- KPI Cards Grid -->
+                <section class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+                    <!-- Total Referrals -->
+                    <div class="kpi-card card-glow">
+                        <div class="kpi-icon bg-gold-gradient">
+                            <i class="fa-solid fa-user-plus"></i>
+                        </div>
+                        <div class="kpi-details">
+                            <span class="kpi-title">Jumlah Rujukan (Referrals)</span>
+                            <h2 id="kpi-total-referrals" class="kpi-value">0</h2>
+                            <div class="kpi-sub-text" style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                                Ahli baru berdaftar
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total Unique Recruiters -->
+                    <div class="kpi-card">
+                        <div class="kpi-icon bg-blue-gradient">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div class="kpi-details">
+                            <span class="kpi-title">Jumlah Perekrut Aktif</span>
+                            <h2 id="kpi-total-recruiters" class="kpi-value">0</h2>
+                            <div class="kpi-sub-text" style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                                Kod pelanggan unik membawa referral
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Average Referrals per Recruiter -->
+                    <div class="kpi-card">
+                        <div class="kpi-icon bg-green-gradient">
+                            <i class="fa-solid fa-calculator"></i>
+                        </div>
+                        <div class="kpi-details">
+                            <span class="kpi-title">Purata Rujukan Perekrut</span>
+                            <h2 id="kpi-avg-referrals" class="kpi-value">0.0</h2>
+                            <div class="kpi-sub-text" style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                                Rujukan bagi setiap perekrut
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Recruiter of the Period -->
+                    <div class="kpi-card">
+                        <div class="kpi-icon bg-purple-gradient">
+                            <i class="fa-solid fa-trophy"></i>
+                        </div>
+                        <div class="kpi-details">
+                            <span class="kpi-title">Perekrut Terbaik (Top Recruiter)</span>
+                            <h2 id="kpi-top-recruiter-name" class="kpi-value" style="font-size: 18px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 250px;">Tiada</h2>
+                            <div class="kpi-sub-text" style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                                <span id="kpi-top-recruiter-code">-</span> (<span id="kpi-top-recruiter-count">0</span> rujukan)
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Charts Section -->
+                <section class="charts-grid" style="grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));">
+                    <!-- Chart 1: Monthly Recruitment Trend -->
+                    <div class="card chart-card large-chart" style="grid-column: span 2;">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-chart-line text-gold"></i> Trend Pendaftaran Rujukan Bulanan (2026)</h3>
+                        </div>
+                        <div class="chart-container" style="height: 320px; position: relative;">
+                            <canvas id="chart-recruitment-trend"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 2: Top 10 Recruiters Leaderboard -->
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-medal text-gold"></i> 10 Perekrut Terbaik (Leaderboard)</h3>
+                        </div>
+                        <div class="chart-container" style="height: 300px; position: relative;">
+                            <canvas id="chart-top-recruiters"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 3: Recruiter Distribution Segment -->
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-chart-pie text-purple"></i> Profiling Agihan Kumpulan Perekrut</h3>
+                        </div>
+                        <div class="chart-container" style="height: 300px; position: relative;">
+                            <canvas id="chart-segment-distribution"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Interactive Data Table Section -->
+                <section class="card table-card">
+                    <div class="table-header-row">
+                        <div class="table-title">
+                            <h2><i class="fa-solid fa-table text-gold"></i> Rekod Rujukan Perekrut</h2>
+                            <p>Senarai pelanggan yang berdaftar sebagai perekrut dan bilangan rujukan mereka</p>
+                        </div>
+                        <div class="table-actions">
+                            <select id="table-filter-month" class="form-control" style="height: 38px; padding-top: 6px; padding-bottom: 6px;">
+                                <option value="all">Semua Bulan</option>
+                                <option value="01">Januari</option>
+                                <option value="02">Februari</option>
+                                <option value="03">Mac</option>
+                                <option value="04">April</option>
+                                <option value="05">Mei</option>
+                                <option value="06">Jun</option>
+                                <option value="07">Julai</option>
+                                <option value="08">Ogos</option>
+                                <option value="09">September</option>
+                                <option value="10">Oktober</option>
+                                <option value="11">November</option>
+                                <option value="12">Disember</option>
+                            </select>
+                            <div class="search-box">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="table-search" placeholder="Cari nama / kod pelanggan...">
+                            </div>
+                            <button id="btn-export-csv" class="btn btn-success-outline">
+                                <i class="fa-solid fa-file-csv"></i> Eksport CSV
+                            </button>
+                            <button id="btn-export-xlsx" class="btn btn-success">
+                                <i class="fa-solid fa-file-excel"></i> Eksport Excel
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="data-table" id="recruitment-table">
+                            <thead>
+                                <tr>
+                                    <th class="text-center sortable" data-sort="rank" style="width: 80px;">No. <i class="fa-solid fa-sort"></i></th>
+                                    <th class="sortable" data-sort="code">Kod Pelanggan <i class="fa-solid fa-sort"></i></th>
+                                    <th class="sortable" data-sort="name">Nama Pelanggan <i class="fa-solid fa-sort"></i></th>
+                                    <th class="text-center">Tempoh Tarikh Laporan (Bulanan)</th>
+                                    <th class="text-center sortable" data-sort="referrals" style="width: 150px;">Bil. Rujukan <i class="fa-solid fa-sort"></i></th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                <!-- Data rows will be generated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="table-footer">
+                        <div class="pagination-info" id="pagination-info">
+                            Menunjukkan 0 hingga 0 daripada 0 entri
+                        </div>
+                        <div class="pagination-controls" id="pagination-controls">
+                            <!-- Pagination buttons will be generated dynamically -->
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="main-footer-text">
+            <p>&copy; 2026 GBGold Recruitment Analysis Dashboard. Direka untuk prestasi tinggi dan keputusan pintar.</p>
+        </footer>
+    </div>
+    
+    <!-- App JavaScript -->
+    <script src="recruitment-app.js"></script>
+</body>
+</html>

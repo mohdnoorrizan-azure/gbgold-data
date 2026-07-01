@@ -1122,3 +1122,40 @@ select.form-control {
 .leaderboard-rank-2 .leaderboard-progress-bar { background: var(--blue-gradient); }
 .leaderboard-rank-3 .leaderboard-progress-bar { background: var(--green-gradient); }
 .leaderboard-rank-other .leaderboard-progress-bar { background: linear-gradient(135deg, #94a3b8, #64748b); }
+
+/* --- Dashboard Switcher Navigation --- */
+.dashboard-switcher {
+    display: flex;
+    gap: 12px;
+    margin-bottom: -8px;
+    width: 100%;
+}
+.switcher-btn {
+    padding: 10px 20px;
+    border-radius: 30px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-fast);
+    cursor: pointer;
+}
+.switcher-btn:hover {
+    background: var(--bg-card-hover);
+    color: var(--crimson);
+    border-color: var(--crimson);
+    box-shadow: var(--shadow-md);
+}
+.switcher-btn.active {
+    background: var(--crimson-gradient);
+    color: #ffffff;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(143, 29, 56, 0.2);
+}
+

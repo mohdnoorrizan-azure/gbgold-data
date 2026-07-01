@@ -1,0 +1,716 @@
+[
+    {
+        "code": "GB00000001",
+        "name": "GB GOLD HQ",
+        "from": "2026-01-01",
+        "to": "2026-01-31",
+        "referrals": 4
+    },
+    {
+        "code": "GB00000013",
+        "name": "NORAZLINA NAJMUDIN",
+        "from": "2026-01-01",
+        "to": "2026-01-31",
+        "referrals": 40
+    },
+    {
+        "code": "GB00000015",
+        "name": "SAFRI BIN SOFYART",
+        "from": "2026-01-01",
+        "to": "2026-01-31",
+        "referrals": 90
+    },
+    {
+        "code": "GB00000367",
+        "name": "HALIL BIN ISMAIL",
+        "from": "2026-01-01",
+        "to": "2026-01-31",
+        "referrals": 3
+    },
+    {
+        "code": "GB00000630",
+        "name": "AHMED AKMAL BIN ABDULL WAHID",
+        "from": "2026-01-01",
+        "to": "2026-01-31",
+        "referrals": 4
+    },
+    {
+        "code": "GB00000779",
+        "name": "NORFADZRINA BINTI KAMARUDDIN",
+        "from": "2026-01-01",
+        "to": "2026-01-31",
+        "referrals": 1
+    },
+    {
+        "code": "GB00000861",
+        "name": "ABDUL HAQIM BIN ABDUL RAHIM",
+        "from": "2026-01-01",
+        "to": "2026-01-31",
+        "referrals": 2
+    },
+    {
+        "code": "GB00000889",
+        "name": "NURUL AIN BINTI ABD AZIZ",
+        "from": "2026-01-01",
+        "to": "2026-01-31",
+        "referrals": 1
+    },
+    {
+        "code": "GB00001008",
+        "name": "HAWINA BINTI MORSHIDI",
+        "from": "2026-01-01",
+        "to": "2026-01-31",
+        "referrals": 3
+    },
+    {
+        "code": "GB00001566",
+        "name": "KHATIJAH KAMARUDIN",
+        "from": "2026-01-01",
+        "to": "2026-01-31",
+        "referrals": 4
+    },
+    {
+        "code": "GB00001716",
+        "name": "SYAHMILFARIS BIN JAAFAR",
+        "from": "2026-01-01",
+        "to": "2026-01-31",
+        "referrals": 3
+    },
+    {
+        "code": "GB00001747",
+        "name": "ZURIANA BINTI MOHD JAMAL",
+        "from": "2026-01-01",
+        "to": "2026-01-31",
+        "referrals": 2
+    },
+    {
+        "code": "GB00002346",
+        "name": "JOHARI BIN YAZID",
+        "from": "2026-01-01",
+        "to": "2026-01-31",
+        "referrals": 3
+    },
+    {
+        "code": "GB00002419",
+        "name": "AHMAD FAUZAN BIN AHMAD ANUAR",
+        "from": "2026-01-01",
+        "to": "2026-01-31",
+        "referrals": 1
+    },
+    {
+        "code": "GB00002622",
+        "name": "YAATI BINTI NOR",
+        "from": "2026-01-01",
+        "to": "2026-01-31",
+        "referrals": 95
+    },
+    {
+        "code": "GB00000001",
+        "name": "GB GOLD HQ",
+        "from": "2026-02-01",
+        "to": "2026-02-28",
+        "referrals": 4
+    },
+    {
+        "code": "GB00000011",
+        "name": "MUHAMMAD ALIF BIN MOHD SATAR",
+        "from": "2026-02-01",
+        "to": "2026-02-28",
+        "referrals": 1
+    },
+    {
+        "code": "GB00000013",
+        "name": "NORAZLINA NAJMUDIN",
+        "from": "2026-02-01",
+        "to": "2026-02-28",
+        "referrals": 60
+    },
+    {
+        "code": "GB00000400",
+        "name": "MUHAMMAD DANISH ARRAZIN BIN MOHD RAZIP",
+        "from": "2026-02-01",
+        "to": "2026-02-28",
+        "referrals": 4
+    },
+    {
+        "code": "GB00000545",
+        "name": "SHUHAIRAZI BIN JANUDIN @ SHAMSUDIN",
+        "from": "2026-02-01",
+        "to": "2026-02-28",
+        "referrals": 11
+    },
+    {
+        "code": "GB00000770",
+        "name": "MUHAMMAD BADDRUN BIN MOHD SALLEH",
+        "from": "2026-02-01",
+        "to": "2026-02-28",
+        "referrals": 3
+    },
+    {
+        "code": "GB00000861",
+        "name": "ABDUL HAQIM BIN ABDUL RAHIM",
+        "from": "2026-02-01",
+        "to": "2026-02-28",
+        "referrals": 2
+    },
+    {
+        "code": "GB00000889",
+        "name": "NURUL AIN BINTI ABD AZIZ",
+        "from": "2026-02-01",
+        "to": "2026-02-28",
+        "referrals": 1
+    },
+    {
+        "code": "GB00001456",
+        "name": "ABD RAHIM BIN HAJI MAHMOOD",
+        "from": "2026-02-01",
+        "to": "2026-02-28",
+        "referrals": 2
+    },
+    {
+        "code": "GB00001566",
+        "name": "KHATIJAH KAMARUDIN",
+        "from": "2026-02-01",
+        "to": "2026-02-28",
+        "referrals": 2
+    },
+    {
+        "code": "GB00001716",
+        "name": "SYAHMILFARIS BIN JAAFAR",
+        "from": "2026-02-01",
+        "to": "2026-02-28",
+        "referrals": 4
+    },
+    {
+        "code": "GB00001747",
+        "name": "ZURIANA BINTI MOHD JAMAL",
+        "from": "2026-02-01",
+        "to": "2026-02-28",
+        "referrals": 3
+    },
+    {
+        "code": "GB00002391",
+        "name": "MOHD NORHAZIM BIN MOHD NORIN",
+        "from": "2026-02-01",
+        "to": "2026-02-28",
+        "referrals": 3
+    },
+    {
+        "code": "GB00002419",
+        "name": "AHMAD FAUZAN BIN AHMAD ANUAR",
+        "from": "2026-02-01",
+        "to": "2026-02-28",
+        "referrals": 1
+    },
+    {
+        "code": "GB00000001",
+        "name": "GB GOLD HQ",
+        "from": "2026-03-01",
+        "to": "2026-03-31",
+        "referrals": 2
+    },
+    {
+        "code": "GB00000005",
+        "name": "SU RAIHAN MOHAMED",
+        "from": "2026-03-01",
+        "to": "2026-03-31",
+        "referrals": 3
+    },
+    {
+        "code": "GB00000011",
+        "name": "MUHAMMAD ALIF BIN MOHD SATAR",
+        "from": "2026-03-01",
+        "to": "2026-03-31",
+        "referrals": 4
+    },
+    {
+        "code": "GB00000013",
+        "name": "NORAZLINA NAJMUDIN",
+        "from": "2026-03-01",
+        "to": "2026-03-31",
+        "referrals": 72
+    },
+    {
+        "code": "GB00000015",
+        "name": "SAFRI BIN SOFYART",
+        "from": "2026-03-01",
+        "to": "2026-03-31",
+        "referrals": 110
+    },
+    {
+        "code": "GB00000363",
+        "name": "SUHAIZAH BINTI ABDUL WAHAB",
+        "from": "2026-03-01",
+        "to": "2026-03-31",
+        "referrals": 4
+    },
+    {
+        "code": "GB00000367",
+        "name": "HALIL BIN ISMAIL",
+        "from": "2026-03-01",
+        "to": "2026-03-31",
+        "referrals": 4
+    },
+    {
+        "code": "GB00000400",
+        "name": "MUHAMMAD DANISH ARRAZIN BIN MOHD RAZIP",
+        "from": "2026-03-01",
+        "to": "2026-03-31",
+        "referrals": 1
+    },
+    {
+        "code": "GB00000545",
+        "name": "SHUHAIRAZI BIN JANUDIN @ SHAMSUDIN",
+        "from": "2026-03-01",
+        "to": "2026-03-31",
+        "referrals": 37
+    },
+    {
+        "code": "GB00000778",
+        "name": "ASMA AMANI BINTI RAMON ZAHEDIN",
+        "from": "2026-03-01",
+        "to": "2026-03-31",
+        "referrals": 2
+    },
+    {
+        "code": "GB00000861",
+        "name": "ABDUL HAQIM BIN ABDUL RAHIM",
+        "from": "2026-03-01",
+        "to": "2026-03-31",
+        "referrals": 3
+    },
+    {
+        "code": "GB00000889",
+        "name": "NURUL AIN BINTI ABD AZIZ",
+        "from": "2026-03-01",
+        "to": "2026-03-31",
+        "referrals": 2
+    },
+    {
+        "code": "GB00001008",
+        "name": "HAWINA BINTI MORSHIDI",
+        "from": "2026-03-01",
+        "to": "2026-03-31",
+        "referrals": 4
+    },
+    {
+        "code": "GB00001456",
+        "name": "ABD RAHIM BIN HAJI MAHMOOD",
+        "from": "2026-03-01",
+        "to": "2026-03-31",
+        "referrals": 4
+    },
+    {
+        "code": "GB00001716",
+        "name": "SYAHMILFARIS BIN JAAFAR",
+        "from": "2026-03-01",
+        "to": "2026-03-31",
+        "referrals": 4
+    },
+    {
+        "code": "GB00001747",
+        "name": "ZURIANA BINTI MOHD JAMAL",
+        "from": "2026-03-01",
+        "to": "2026-03-31",
+        "referrals": 4
+    },
+    {
+        "code": "GB00002346",
+        "name": "JOHARI BIN YAZID",
+        "from": "2026-03-01",
+        "to": "2026-03-31",
+        "referrals": 4
+    },
+    {
+        "code": "GB00002419",
+        "name": "AHMAD FAUZAN BIN AHMAD ANUAR",
+        "from": "2026-03-01",
+        "to": "2026-03-31",
+        "referrals": 1
+    },
+    {
+        "code": "GB00000005",
+        "name": "SU RAIHAN MOHAMED",
+        "from": "2026-04-01",
+        "to": "2026-04-30",
+        "referrals": 4
+    },
+    {
+        "code": "GB00000011",
+        "name": "MUHAMMAD ALIF BIN MOHD SATAR",
+        "from": "2026-04-01",
+        "to": "2026-04-30",
+        "referrals": 1
+    },
+    {
+        "code": "GB00000013",
+        "name": "NORAZLINA NAJMUDIN",
+        "from": "2026-04-01",
+        "to": "2026-04-30",
+        "referrals": 74
+    },
+    {
+        "code": "GB00000363",
+        "name": "SUHAIZAH BINTI ABDUL WAHAB",
+        "from": "2026-04-01",
+        "to": "2026-04-30",
+        "referrals": 3
+    },
+    {
+        "code": "GB00000630",
+        "name": "AHMED AKMAL BIN ABDULL WAHID",
+        "from": "2026-04-01",
+        "to": "2026-04-30",
+        "referrals": 3
+    },
+    {
+        "code": "GB00000770",
+        "name": "MUHAMMAD BADDRUN BIN MOHD SALLEH",
+        "from": "2026-04-01",
+        "to": "2026-04-30",
+        "referrals": 4
+    },
+    {
+        "code": "GB00000778",
+        "name": "ASMA AMANI BINTI RAMON ZAHEDIN",
+        "from": "2026-04-01",
+        "to": "2026-04-30",
+        "referrals": 4
+    },
+    {
+        "code": "GB00000861",
+        "name": "ABDUL HAQIM BIN ABDUL RAHIM",
+        "from": "2026-04-01",
+        "to": "2026-04-30",
+        "referrals": 4
+    },
+    {
+        "code": "GB00001716",
+        "name": "SYAHMILFARIS BIN JAAFAR",
+        "from": "2026-04-01",
+        "to": "2026-04-30",
+        "referrals": 2
+    },
+    {
+        "code": "GB00001747",
+        "name": "ZURIANA BINTI MOHD JAMAL",
+        "from": "2026-04-01",
+        "to": "2026-04-30",
+        "referrals": 4
+    },
+    {
+        "code": "GB00002346",
+        "name": "JOHARI BIN YAZID",
+        "from": "2026-04-01",
+        "to": "2026-04-30",
+        "referrals": 1
+    },
+    {
+        "code": "GB00002391",
+        "name": "MOHD NORHAZIM BIN MOHD NORIN",
+        "from": "2026-04-01",
+        "to": "2026-04-30",
+        "referrals": 4
+    },
+    {
+        "code": "GB00002419",
+        "name": "AHMAD FAUZAN BIN AHMAD ANUAR",
+        "from": "2026-04-01",
+        "to": "2026-04-30",
+        "referrals": 1
+    },
+    {
+        "code": "GB00002622",
+        "name": "YAATI BINTI NOR",
+        "from": "2026-04-01",
+        "to": "2026-04-30",
+        "referrals": 98
+    },
+    {
+        "code": "GB00000005",
+        "name": "SU RAIHAN MOHAMED",
+        "from": "2026-05-01",
+        "to": "2026-05-31",
+        "referrals": 1
+    },
+    {
+        "code": "GB00000013",
+        "name": "NORAZLINA NAJMUDIN",
+        "from": "2026-05-01",
+        "to": "2026-05-31",
+        "referrals": 64
+    },
+    {
+        "code": "GB00000367",
+        "name": "HALIL BIN ISMAIL",
+        "from": "2026-05-01",
+        "to": "2026-05-31",
+        "referrals": 2
+    },
+    {
+        "code": "GB00000400",
+        "name": "MUHAMMAD DANISH ARRAZIN BIN MOHD RAZIP",
+        "from": "2026-05-01",
+        "to": "2026-05-31",
+        "referrals": 4
+    },
+    {
+        "code": "GB00000630",
+        "name": "AHMED AKMAL BIN ABDULL WAHID",
+        "from": "2026-05-01",
+        "to": "2026-05-31",
+        "referrals": 4
+    },
+    {
+        "code": "GB00000778",
+        "name": "ASMA AMANI BINTI RAMON ZAHEDIN",
+        "from": "2026-05-01",
+        "to": "2026-05-31",
+        "referrals": 3
+    },
+    {
+        "code": "GB00000861",
+        "name": "ABDUL HAQIM BIN ABDUL RAHIM",
+        "from": "2026-05-01",
+        "to": "2026-05-31",
+        "referrals": 4
+    },
+    {
+        "code": "GB00000889",
+        "name": "NURUL AIN BINTI ABD AZIZ",
+        "from": "2026-05-01",
+        "to": "2026-05-31",
+        "referrals": 2
+    },
+    {
+        "code": "GB00001008",
+        "name": "HAWINA BINTI MORSHIDI",
+        "from": "2026-05-01",
+        "to": "2026-05-31",
+        "referrals": 4
+    },
+    {
+        "code": "GB00001566",
+        "name": "KHATIJAH KAMARUDIN",
+        "from": "2026-05-01",
+        "to": "2026-05-31",
+        "referrals": 4
+    },
+    {
+        "code": "GB00001747",
+        "name": "ZURIANA BINTI MOHD JAMAL",
+        "from": "2026-05-01",
+        "to": "2026-05-31",
+        "referrals": 4
+    },
+    {
+        "code": "GB00002419",
+        "name": "AHMAD FAUZAN BIN AHMAD ANUAR",
+        "from": "2026-05-01",
+        "to": "2026-05-31",
+        "referrals": 1
+    },
+    {
+        "code": "GB00002622",
+        "name": "YAATI BINTI NOR",
+        "from": "2026-05-01",
+        "to": "2026-05-31",
+        "referrals": 9
+    },
+    {
+        "code": "GB00000001",
+        "name": "GB GOLD HQ",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 5
+    },
+    {
+        "code": "GB00000005",
+        "name": "SU RAIHAN MOHAMED",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 3
+    },
+    {
+        "code": "GB00000006",
+        "name": "NASRUL HANIS BIN ABD HALIM",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 20
+    },
+    {
+        "code": "GB00000011",
+        "name": "MUHAMMAD ALIF BIN MOHD SATAR",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 3
+    },
+    {
+        "code": "GB00000013",
+        "name": "NORAZLINA NAJMUDIN",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 23
+    },
+    {
+        "code": "GB00000015",
+        "name": "SAFRI BIN SOFYART",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 53
+    },
+    {
+        "code": "GB00000363",
+        "name": "SUHAIZAH BINTI ABDUL WAHAB",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 1
+    },
+    {
+        "code": "GB00000367",
+        "name": "HALIL BIN ISMAIL",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 3
+    },
+    {
+        "code": "GB00000400",
+        "name": "MUHAMMAD DANISH ARRAZIN BIN MOHD RAZIP",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 1
+    },
+    {
+        "code": "GB00000545",
+        "name": "SHUHAIRAZI BIN JANUDIN @ SHAMSUDIN",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 18
+    },
+    {
+        "code": "GB00000559",
+        "name": "MOHD NORFAHIZ BIN MOHD PATHAN",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 1
+    },
+    {
+        "code": "GB00000630",
+        "name": "AHMED AKMAL BIN ABDULL WAHID",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 1
+    },
+    {
+        "code": "GB00000770",
+        "name": "MUHAMMAD BADDRUN BIN MOHD SALLEH",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 1
+    },
+    {
+        "code": "GB00000778",
+        "name": "ASMA AMANI BINTI RAMON ZAHEDIN",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 1
+    },
+    {
+        "code": "GB00000779",
+        "name": "NORFADZRINA BINTI KAMARUDDIN",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 2
+    },
+    {
+        "code": "GB00000861",
+        "name": "ABDUL HAQIM BIN ABDUL RAHIM",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 1
+    },
+    {
+        "code": "GB00000889",
+        "name": "NURUL AIN BINTI ABD AZIZ",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 5
+    },
+    {
+        "code": "GB00001008",
+        "name": "HAWINA BINTI MORSHIDI",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 1
+    },
+    {
+        "code": "GB00001456",
+        "name": "ABD RAHIM BIN HAJI MAHMOOD",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 2
+    },
+    {
+        "code": "GB00001566",
+        "name": "KHATIJAH KAMARUDIN",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 1
+    },
+    {
+        "code": "GB00001716",
+        "name": "SYAHMILFARIS BIN JAAFAR",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 1
+    },
+    {
+        "code": "GB00001747",
+        "name": "ZURIANA BINTI MOHD JAMAL",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 2
+    },
+    {
+        "code": "GB00002274",
+        "name": "MOHAMAD SHAHREL BIN MOHD YUDIN",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 2
+    },
+    {
+        "code": "GB00002312",
+        "name": "MOHD AMIRON BIN ROSLI",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 5
+    },
+    {
+        "code": "GB00002346",
+        "name": "JOHARI BIN YAZID",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 1
+    },
+    {
+        "code": "GB00002391",
+        "name": "MOHD NORHAZIM BIN MOHD NORIN",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 1
+    },
+    {
+        "code": "GB00002419",
+        "name": "AHMAD FAUZAN BIN AHMAD ANUAR",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 1
+    },
+    {
+        "code": "GB00002622",
+        "name": "YAATI BINTI NOR",
+        "from": "2026-06-01",
+        "to": "2026-06-30",
+        "referrals": 45
+    }
+]
