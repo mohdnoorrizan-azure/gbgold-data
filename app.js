@@ -612,6 +612,7 @@ document.addEventListener('DOMContentLoaded', () => {
             dashboardView.style.display = 'none';
             btnSaveServer.style.display = 'none';
             btnReset.style.display = 'none';
+            document.getElementById('btn-toggle-upload').style.display = 'none';
             return;
         }
 
@@ -619,6 +620,8 @@ document.addEventListener('DOMContentLoaded', () => {
         dashboardView.style.display = 'block';
         btnSaveServer.style.display = 'inline-flex';
         btnReset.style.display = 'inline-flex';
+        document.getElementById('btn-toggle-upload').style.display = 'inline-flex';
+        document.getElementById('btn-toggle-upload').innerHTML = '<i class="fa-solid fa-file-import"></i> Import Fail';
 
         let minDate = combinedData[0].date;
         let maxDate = combinedData[combinedData.length - 1].date;
@@ -1291,6 +1294,7 @@ document.addEventListener('DOMContentLoaded', () => {
             recruitmentDashboardView.style.display = 'none';
             btnRecruitmentSaveServer.style.display = 'none';
             btnRecruitmentReset.style.display = 'none';
+            document.getElementById('btn-recruitment-toggle-upload').style.display = 'none';
             return;
         }
 
@@ -1298,6 +1302,8 @@ document.addEventListener('DOMContentLoaded', () => {
         recruitmentDashboardView.style.display = 'block';
         btnRecruitmentSaveServer.style.display = 'inline-flex';
         btnRecruitmentReset.style.display = 'inline-flex';
+        document.getElementById('btn-recruitment-toggle-upload').style.display = 'inline-flex';
+        document.getElementById('btn-recruitment-toggle-upload').innerHTML = '<i class="fa-solid fa-file-import"></i> Import Fail';
 
         let minDate = recruitmentData[0].from;
         let maxDate = recruitmentData[0].to;
@@ -1833,4 +1839,28 @@ document.addEventListener('DOMContentLoaded', () => {
         if (parts.length !== 3) return dateStr;
         return `${parts[2]}/${parts[1]}/${parts[0]}`;
     }
+
+    // --- Toggle Upload Visibility (Sales) ---
+    const btnToggleUpload = document.getElementById('btn-toggle-upload');
+    btnToggleUpload.addEventListener('click', () => {
+        if (uploadSection.style.display === 'none') {
+            uploadSection.style.display = 'block';
+            btnToggleUpload.innerHTML = '<i class="fa-solid fa-xmark"></i> Tutup Import';
+        } else {
+            uploadSection.style.display = 'none';
+            btnToggleUpload.innerHTML = '<i class="fa-solid fa-file-import"></i> Import Fail';
+        }
+    });
+
+    // --- Toggle Upload Visibility (Recruitment) ---
+    const btnRecruitmentToggleUpload = document.getElementById('btn-recruitment-toggle-upload');
+    btnRecruitmentToggleUpload.addEventListener('click', () => {
+        if (recruitmentUploadSection.style.display === 'none') {
+            recruitmentUploadSection.style.display = 'block';
+            btnRecruitmentToggleUpload.innerHTML = '<i class="fa-solid fa-xmark"></i> Tutup Import';
+        } else {
+            recruitmentUploadSection.style.display = 'none';
+            btnRecruitmentToggleUpload.innerHTML = '<i class="fa-solid fa-file-import"></i> Import Fail';
+        }
+    });
 });
