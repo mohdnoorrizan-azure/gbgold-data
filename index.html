@@ -23,35 +23,43 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Dashboard Switcher Navigation -->
-        <div class="dashboard-switcher" style="display: flex; gap: 12px; margin-bottom: -8px;">
-            <a href="index.html" class="switcher-btn active"><i class="fa-solid fa-chart-line"></i> Analisis Jualan</a>
-            <a href="recruitment.html" class="switcher-btn"><i class="fa-solid fa-users"></i> Analisis Rekrutmen</a>
-        </div>
-
-        <!-- Sidebar / Brand Header -->
-        <header class="main-header">
-            <div class="brand">
+        <!-- Sidebar Navigation Left -->
+        <aside class="sidebar-nav">
+            <div class="brand" style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px;">
                 <div class="logo-icon">
                     <i class="fa-solid fa-coins gold-glow"></i>
                 </div>
                 <div class="brand-text">
-                    <h1>GB<span>GOLD</span></h1>
-                    <p>Sistem Analisis Data Jualan</p>
+                    <h1 style="font-size: 20px; font-weight: 800; line-height: 1.1; font-family: var(--font-heading);">GB<span style="color: var(--gold); background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">GOLD</span></h1>
+                    <p style="font-size: 11px; color: var(--text-muted); font-weight: 400; font-family: var(--font-sans);">Sistem Analisis Data</p>
                 </div>
             </div>
-            <div class="header-actions">
-                <button id="btn-load-demo" class="btn btn-secondary">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> Muat Data Demo
-                </button>
-                <button id="btn-save-server" class="btn btn-primary" style="display: none;">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> Simpan ke Server
-                </button>
-                <button id="btn-reset" class="btn btn-danger" style="display: none;">
-                    <i class="fa-solid fa-trash-can"></i> Kosongkan Data
-                </button>
-            </div>
-        </header>
+            <nav class="sidebar-menu">
+                <a href="index.html" class="menu-btn active"><i class="fa-solid fa-chart-line"></i> Analisis Jualan</a>
+                <a href="recruitment.html" class="menu-btn"><i class="fa-solid fa-users"></i> Analisis Rekrutmen</a>
+            </nav>
+        </aside>
+
+        <!-- Main Body Right -->
+        <div class="main-body" style="flex-grow: 1; display: flex; flex-direction: column; gap: 24px; min-width: 0;">
+            <!-- Header -->
+            <header class="main-header" style="border-bottom: 3px solid var(--crimson);">
+                <div class="header-title">
+                    <h2 style="font-family: var(--font-heading); color: var(--text-dark); font-size: 20px;"><i class="fa-solid fa-chart-line gold-text"></i> Analisis Jualan 2026</h2>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Urus dan analisa data jualan harian GBS & Retail</p>
+                </div>
+                <div class="header-actions">
+                    <button id="btn-load-demo" class="btn btn-secondary">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Muat Data Demo
+                    </button>
+                    <button id="btn-save-server" class="btn btn-primary" style="display: none;">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Simpan ke Server
+                    </button>
+                    <button id="btn-reset" class="btn btn-danger" style="display: none;">
+                        <i class="fa-solid fa-trash-can"></i> Kosongkan Data
+                    </button>
+                </div>
+            </header>
 
         <!-- Main Content -->
         <main class="main-content">
@@ -385,7 +393,8 @@
         <footer class="main-footer-text">
             <p>&copy; 2026 GBGold Sales Analysis Dashboard. Direka untuk prestasi tinggi dan keputusan pintar.</p>
         </footer>
-    </div>
+        </div> <!-- End of .main-body -->
+    </div> <!-- End of .app-container -->
     
     <!-- App JavaScript -->
     <script src="app.js"></script>
