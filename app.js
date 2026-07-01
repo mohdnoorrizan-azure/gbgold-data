@@ -1,21 +1,67 @@
-// GBGold Sales Analysis Dashboard - App Logic
+// GBGold Integrated Sales & Recruitment Dashboard - App Logic
 
 document.addEventListener('DOMContentLoaded', () => {
-    // --- State Management ---
-    let gbsData = null;      // Parsed GBS Purchase data
-    let retailData = null;   // Parsed Retail Sales data
-    let combinedData = [];   // Merged data sorted by date
-    let filteredData = [];   // Merged data after applying filters
     
-    // Table Sorting State
+    // ==========================================
+    // --- 1. SPA TAB SWITCHER NAVIGATION ---
+    // ==========================================
+    const btnNavSales = document.getElementById('btn-nav-sales');
+    const btnNavRecruitment = document.getElementById('btn-nav-recruitment');
+    const salesContainer = document.getElementById('sales-dashboard-container');
+    const recruitmentContainer = document.getElementById('recruitment-dashboard-container');
+
+    btnNavSales.addEventListener('click', (e) => {
+        e.preventDefault();
+        btnNavSales.classList.add('active');
+        btnNavRecruitment.classList.remove('active');
+        salesContainer.style.display = 'block';
+        recruitmentContainer.style.display = 'none';
+        
+        // Trigger Chart.js resizes to handle hidden container drawing quirks
+        triggerSalesChartResizes();
+    });
+
+    btnNavRecruitment.addEventListener('click', (e) => {
+        e.preventDefault();
+        btnNavRecruitment.classList.add('active');
+        btnNavSales.classList.remove('active');
+        salesContainer.style.display = 'none';
+        recruitmentContainer.style.display = 'block';
+        
+        // Trigger Recruitment Chart resizes
+        triggerRecruitmentChartResizes();
+    });
+
+    function triggerSalesChartResizes() {
+        if (chartSalesTrend) chartSalesTrend.resize();
+        if (chartWeightCompare) chartWeightCompare.resize();
+        if (chartWeightMonthly) chartWeightMonthly.resize();
+        if (chartPriceTrend) chartPriceTrend.resize();
+        if (chartPriceMonthly) chartPriceMonthly.resize();
+        if (chartContribution) chartContribution.resize();
+        if (chartMonthlySales) chartMonthlySales.resize();
+    }
+
+    function triggerRecruitmentChartResizes() {
+        if (chartRecruitmentTrend) chartRecruitmentTrend.resize();
+        if (chartRecruitmentTopRecruiters) chartRecruitmentTopRecruiters.resize();
+        if (chartRecruitmentSegmentDistribution) chartRecruitmentSegmentDistribution.resize();
+    }
+
+    // ==========================================
+    // --- 2. STATE MANAGEMENT ---
+    // ==========================================
+    // --- Sales Dashboard State ---
+    let gbsData = null;      
+    let retailData = null;   
+    let combinedData = [];   
+    let filteredData = [];   
+    
     let currentSortColumn = 'date';
     let currentSortAscending = true;
-    
-    // Table Pagination State
     let currentPage = 1;
     const rowsPerPage = 31;
 
-    // Chart Instances
     let chartSalesTrend = null;
     let chartWeightCompare = null;
     let chartWeightMonthly = null;
@@ -24,7 +70,23 @@ document.addEventListener('DOMContentLoaded', () => {
     let chartContribution = null;
     let chartMonthlySales = null;
 
-    // --- DOM Elements ---
+    // --- Recruitment Dashboard State ---
+    let recruitmentData = []; 
+    let filteredRecruitmentData = []; 
+    
+    let currentRecruitmentSortColumn = 'referrals';
+    let currentRecruitmentSortAscending = false;
+    let currentRecruitmentPage = 1;
+    const recruitmentRowsPerPage = 20;
+
+    let chartRecruitmentTrend = null;
+    let chartRecruitmentTopRecruiters = null;
+    let chartRecruitmentSegmentDistribution = null;
+
+    // ==========================================
+    // --- 3. DOM ELEMENTS ---
+    // ==========================================
+    // --- Sales DOM Elements ---
     const dropZoneGbs = document.getElementById('drop-zone-gbs');
     const dropZoneRetail = document.getElementById('drop-zone-retail');
     const fileGbsInput = document.getElementById('file-gbs');
@@ -40,43 +102,79 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadSection = document.getElementById('upload-section');
     const dashboardView = document.getElementById('dashboard-view');
     
-    // Filters
     const filterStartDate = document.getElementById('filter-start-date');
     const filterEndDate = document.getElementById('filter-end-date');
     const filterMonth = document.getElementById('filter-month');
     const tableFilterMonth = document.getElementById('table-filter-month');
     const tableSearch = document.getElementById('table-search');
     
-    // KPIs
     const kpiTotalSales = document.getElementById('kpi-total-sales');
     const kpiSubGbsSales = document.getElementById('kpi-sub-gbs-sales');
     const kpiSubRetailSales = document.getElementById('kpi-sub-retail-sales');
-    
     const kpiTotalWeight = document.getElementById('kpi-total-weight');
     const kpiSubGbsWeight = document.getElementById('kpi-sub-gbs-weight');
     const kpiSubRetailWeight = document.getElementById('kpi-sub-retail-weight');
-    
     const kpiAvgPrice = document.getElementById('kpi-avg-price');
     const kpiSubGbsPrice = document.getElementById('kpi-sub-gbs-price');
     const kpiSubRetailPrice = document.getElementById('kpi-sub-retail-price');
-    
     const kpiTotalTx = document.getElementById('kpi-total-tx');
     const kpiSubGbsTx = document.getElementById('kpi-sub-gbs-tx');
     const kpiSubRetailTx = document.getElementById('kpi-sub-retail-tx');
     
-    // Table & Export
     const tableBody = document.getElementById('table-body');
     const paginationInfo = document.getElementById('pagination-info');
     const paginationControls = document.getElementById('pagination-controls');
     const btnExportCsv = document.getElementById('btn-export-csv');
     const btnExportXlsx = document.getElementById('btn-export-xlsx');
 
-    // --- Drag and Drop Setup ---
+    // --- Recruitment DOM Elements ---
+    const dropZoneRecruitment = document.getElementById('drop-zone-recruitment');
+    const fileRecruitmentInput = document.getElementById('file-recruitment');
+    const recruitmentFileInfo = document.getElementById('recruitment-file-info');
+    
+    const btnRecruitmentProcess = document.getElementById('btn-recruitment-process');
+    const btnRecruitmentLoadDemo = document.getElementById('btn-recruitment-load-demo');
+    const btnRecruitmentSaveServer = document.getElementById('btn-recruitment-save-server');
+    const btnRecruitmentReset = document.getElementById('btn-recruitment-reset');
+    
+    const recruitmentUploadSection = document.getElementById('recruitment-upload-section');
+    const recruitmentDashboardView = document.getElementById('recruitment-dashboard-view');
+    
+    const filterRecruitmentStartDate = document.getElementById('filter-recruitment-start-date');
+    const filterRecruitmentEndDate = document.getElementById('filter-recruitment-end-date');
+    const filterRecruitmentMonth = document.getElementById('filter-recruitment-month');
+    const tableRecruitmentFilterMonth = document.getElementById('table-recruitment-filter-month');
+    const tableRecruitmentSearch = document.getElementById('table-recruitment-search');
+    
+    const kpiTotalReferrals = document.getElementById('kpi-total-referrals');
+    const kpiTotalRecruiters = document.getElementById('kpi-total-recruiters');
+    const kpiAvgReferrals = document.getElementById('kpi-recruitment-avg-referrals');
+    const kpiTopRecruiterName = document.getElementById('kpi-recruitment-top-recruiter-name');
+    const kpiTopRecruiterCode = document.getElementById('kpi-recruitment-top-recruiter-code');
+    const kpiTopRecruiterCount = document.getElementById('kpi-recruitment-top-recruiter-count');
+    
+    const tableRecruitmentBody = document.getElementById('table-recruitment-body');
+    const paginationRecruitmentInfo = document.getElementById('pagination-recruitment-info');
+    const paginationRecruitmentControls = document.getElementById('pagination-recruitment-controls');
+    const btnRecruitmentExportCsv = document.getElementById('btn-recruitment-export-csv');
+    const btnRecruitmentExportXlsx = document.getElementById('btn-recruitment-export-xlsx');
+
+    let uploadedRawRecruitmentRows = [];
+
+    // ==========================================
+    // --- 4. STARTUP AUTOMATION (LOAD SERVER DATA) ---
+    // ==========================================
+    loadSalesDataFromServer();
+    loadRecruitmentDataFromServer();
+
+    // ==========================================
+    // --- 5. DRAG & DROP & PARSING LOGIC ---
+    // ==========================================
     setupDragAndDrop(dropZoneGbs, fileGbsInput, (files) => handleFilesSelect(files, 'gbs'));
     setupDragAndDrop(dropZoneRetail, fileRetailInput, (files) => handleFilesSelect(files, 'retail'));
+    setupDragAndDrop(dropZoneRecruitment, fileRecruitmentInput, handleRecruitmentFilesSelect);
 
     function setupDragAndDrop(dropZone, fileInput, callback) {
-        // Click to open file dialog
         dropZone.addEventListener('click', (e) => {
             if (e.target.tagName !== 'BUTTON') {
                 fileInput.click();
@@ -89,7 +187,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Drag events
         ['dragenter', 'dragover'].forEach(eventName => {
             dropZone.addEventListener(eventName, (e) => {
                 e.preventDefault();
@@ -115,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, false);
     }
 
-    // --- File Handlers ---
+    // --- Files Selection Processors (CSV / XLSX Parser) ---
     function handleFilesSelect(files, type) {
         const fileInfoSpan = type === 'gbs' ? gbsFileInfo : retailFileInfo;
         const dropZone = type === 'gbs' ? dropZoneGbs : dropZoneRetail;
@@ -126,54 +223,13 @@ document.addEventListener('DOMContentLoaded', () => {
         fileInfoSpan.textContent = `${filesArray.length} fail terpilih...`;
         dropZone.classList.add('has-file');
         
-        const promises = filesArray.map(file => {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                
-                if (file.name.endsWith('.csv')) {
-                    reader.onload = function(e) {
-                        const text = e.target.result;
-                        Papa.parse(text, {
-                            header: true,
-                            skipEmptyLines: true,
-                            complete: function(results) {
-                                resolve(results.data);
-                            },
-                            error: function(err) {
-                                reject(new Error(`Ralat membaca ${file.name}: ${err.message}`));
-                            }
-                        });
-                    };
-                    reader.onerror = () => reject(new Error(`Ralat membaca ${file.name}`));
-                    reader.readAsText(file);
-                } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
-                    reader.onload = function(e) {
-                        const data = new Uint8Array(e.target.result);
-                        try {
-                            const workbook = XLSX.read(data, { type: 'array' });
-                            const firstSheetName = workbook.SheetNames[0];
-                            const worksheet = workbook.Sheets[firstSheetName];
-                            const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-                            resolve(jsonData);
-                        } catch (err) {
-                            reject(new Error(`Ralat membaca ${file.name}: ${err.message}`));
-                        }
-                    };
-                    reader.onerror = () => reject(new Error(`Ralat membaca ${file.name}`));
-                    reader.readAsArrayBuffer(file);
-                } else {
-                    reject(new Error(`Format fail ${file.name} tidak disokong.`));
-                }
-            });
-        });
+        const promises = filesArray.map(file => parseSingleFile(file));
         
         Promise.all(promises)
             .then(allDataSets => {
-                // Combine all datasets
                 const combinedRows = [].concat(...allDataSets);
-                processParsedData(combinedRows, type);
+                processParsedSalesData(combinedRows, type);
                 
-                // Update file info text
                 const totalSize = filesArray.reduce((acc, f) => acc + f.size, 0);
                 fileInfoSpan.textContent = `${filesArray.length} fail (${formatBytes(totalSize)})`;
             })
@@ -187,35 +243,99 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
-    function processParsedData(data, type) {
+    function handleRecruitmentFilesSelect(files) {
+        const filesArray = Array.from(files);
+        if (filesArray.length === 0) return;
+        
+        recruitmentFileInfo.textContent = `${filesArray.length} fail terpilih...`;
+        dropZoneRecruitment.classList.add('has-file');
+        
+        const promises = filesArray.map(file => parseSingleFile(file));
+        
+        Promise.all(promises)
+            .then(allDataSets => {
+                const combinedRows = [].concat(...allDataSets);
+                uploadedRawRecruitmentRows = cleanRecruitmentData(combinedRows);
+                
+                if (uploadedRawRecruitmentRows.length > 0) {
+                    btnRecruitmentProcess.removeAttribute('disabled');
+                    const totalSize = filesArray.reduce((acc, f) => acc + f.size, 0);
+                    recruitmentFileInfo.textContent = `${filesArray.length} fail (${formatBytes(totalSize)}) - Sedia diproses`;
+                } else {
+                    throw new Error("Tiada data rekrutmen sah yang dijumpai dalam fail.");
+                }
+            })
+            .catch(err => {
+                alert(err.message);
+                recruitmentFileInfo.textContent = 'Sila pilih atau tarik satu atau lebih fail ke sini';
+                dropZoneRecruitment.classList.remove('has-file');
+                uploadedRawRecruitmentRows = [];
+                btnRecruitmentProcess.setAttribute('disabled', 'true');
+            });
+    }
+
+    function parseSingleFile(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            
+            if (file.name.endsWith('.csv')) {
+                reader.onload = function(e) {
+                    Papa.parse(e.target.result, {
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: (results) => resolve(results.data),
+                        error: (err) => reject(new Error(`Ralat membaca ${file.name}: ${err.message}`))
+                    });
+                };
+                reader.onerror = () => reject(new Error(`Ralat membaca ${file.name}`));
+                reader.readAsText(file);
+            } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                reader.onload = function(e) {
+                    const data = new Uint8Array(e.target.result);
+                    try {
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+                        resolve(jsonData);
+                    } catch (err) {
+                        reject(new Error(`Ralat membaca ${file.name}: ${err.message}`));
+                    }
+                };
+                reader.onerror = () => reject(new Error(`Ralat membaca ${file.name}`));
+                reader.readAsArrayBuffer(file);
+            } else {
+                reject(new Error(`Format fail ${file.name} tidak disokong.`));
+            }
+        });
+    }
+
+    // ==========================================
+    // --- 6. DATA CLEANING & SUMMING LOGIC ---
+    // ==========================================
+    // --- Sales Data Cleaners ---
+    function processParsedSalesData(data, type) {
         if (type === 'gbs') {
             gbsData = cleanGbsData(data);
-            console.log("GBS Data Processed:", gbsData);
         } else {
             retailData = cleanRetailData(data);
-            console.log("Retail Data Processed:", retailData);
         }
         
-        // Enable process button if both are uploaded
         if (gbsData && gbsData.length > 0 && retailData && retailData.length > 0) {
             btnProcess.removeAttribute('disabled');
         }
     }
 
-    // --- Data Cleaning Utilities ---
     function cleanGbsData(data) {
         const rawRows = data.map(row => {
-            // Find key names dynamically (case-insensitive & whitespace tolerant)
             const dateKey = findKey(row, 'date');
             const txKey = findKey(row, 'transaction');
             const weightKey = findKey(row, 'weight');
             const salesKey = findKey(row, 'sales');
             const idsKey = findKey(row, 'id');
             
-            const rawDate = row[dateKey];
-            const parsedDate = parseDate(rawDate);
-            
-            if (!parsedDate) return null; // Skip invalid rows
+            const parsedDate = parseDate(row[dateKey]);
+            if (!parsedDate) return null;
             
             return {
                 date: parsedDate,
@@ -226,7 +346,6 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         }).filter(row => row !== null);
 
-        // Group by date and sum values
         const dateMap = new Map();
         rawRows.forEach(row => {
             if (dateMap.has(row.date)) {
@@ -255,10 +374,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const salesKey = findKey(row, 'sales');
             const idsKey = findKey(row, 'id');
             
-            const rawDate = row[dateKey];
-            const parsedDate = parseDate(rawDate);
-            
-            if (!parsedDate) return null; // Skip invalid rows
+            const parsedDate = parseDate(row[dateKey]);
+            if (!parsedDate) return null;
             
             return {
                 date: parsedDate,
@@ -271,7 +388,6 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         }).filter(row => row !== null);
 
-        // Group by date and sum values
         const dateMap = new Map();
         rawRows.forEach(row => {
             if (dateMap.has(row.date)) {
@@ -292,24 +408,49 @@ document.addEventListener('DOMContentLoaded', () => {
         return Array.from(dateMap.values());
     }
 
+    // --- Recruitment Data Cleaners ---
+    function cleanRecruitmentData(data) {
+        return data.map(row => {
+            const codeKey = findKey(row, 'customercode') || findKey(row, 'code');
+            const nameKey = findKey(row, 'customername') || findKey(row, 'name');
+            const fromKey = findKey(row, 'from');
+            const toKey = findKey(row, 'to');
+            const referralsKey = findKey(row, 'referrals') || findKey(row, 'referral');
+
+            const rawCode = String(row[codeKey] || "").trim();
+            const rawName = String(row[nameKey] || "").trim();
+            const referralsCount = parseInt(cleanNumString(row[referralsKey])) || 0;
+
+            if (!rawCode || !rawCode.startsWith('GB')) return null;
+
+            const parsedFrom = parseDate(row[fromKey]);
+            const parsedTo = parseDate(row[toKey]);
+
+            if (!parsedFrom || !parsedTo) return null;
+
+            return {
+                code: rawCode,
+                name: rawName,
+                from: parsedFrom,
+                to: parsedTo,
+                referrals: referralsCount
+            };
+        }).filter(row => row !== null);
+    }
+
     function findKey(row, term) {
         const keys = Object.keys(row);
-        // Find key containing the term (case insensitive)
-        const match = keys.find(k => k.toLowerCase().replace(/\s+/g, '').includes(term.toLowerCase()));
-        return match || keys[0];
+        const match = keys.find(k => k.toLowerCase().replace(/[\s_.-]+/g, '').includes(term.toLowerCase()));
+        return match || null;
     }
 
     function cleanNumString(val) {
         if (val === undefined || val === null) return "0";
-        // Remove currency symbols, commas, spaces
-        return String(val).replace(/[RM$,\s]/gi, '');
+        return String(val).replace(/[^0-9.-]/g, '');
     }
 
-    // Parses Excel date codes or string dates into YYYY-MM-DD
     function parseDate(dateVal) {
         if (!dateVal) return null;
-        
-        // If it's an Excel numeric date representation
         if (typeof dateVal === 'number' || (!isNaN(dateVal) && !isNaN(parseFloat(dateVal)) && String(dateVal).length <= 6)) {
             const excelDate = parseFloat(dateVal);
             const jsDate = new Date(Math.round((excelDate - 25569) * 86400 * 1000));
@@ -317,8 +458,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         const dateStr = String(dateVal).trim();
-        
-        // Match DD/MM/YYYY or DD-MM-YYYY
         const dmyMatch = dateStr.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
         if (dmyMatch) {
             const day = dmyMatch[1].padStart(2, '0');
@@ -327,7 +466,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return `${year}-${month}-${day}`;
         }
         
-        // Match YYYY-MM-DD
         const ymdMatch = dateStr.match(/^(\d{4})[/-](\d{1,2})[/-](\d{1,2})$/);
         if (ymdMatch) {
             const year = ymdMatch[1];
@@ -336,20 +474,29 @@ document.addEventListener('DOMContentLoaded', () => {
             return `${year}-${month}-${day}`;
         }
         
-        // Try parsing directly
         const parsed = Date.parse(dateStr);
         if (!isNaN(parsed)) {
             return new Date(parsed).toISOString().split('T')[0];
         }
-        
         return null;
     }
 
-    // --- Data Merging (Full Outer Join) ---
-    function mergeDatasets() {
+    function formatBytes(bytes, decimals = 2) {
+        if (!+bytes) return '0 Bytes';
+        const k = 1024;
+        const dm = decimals < 0 ? 0 : decimals;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+    }
+
+    // ==========================================
+    // --- 7. DATA MERGES & ALIGNMENTS ---
+    // ==========================================
+    // --- Sales Merge (Full Outer Join) ---
+    function mergeSalesDatasets() {
         const dateMap = new Map();
         
-        // Add all GBS data
         gbsData.forEach(gbsRow => {
             dateMap.set(gbsRow.date, {
                 date: gbsRow.date,
@@ -366,16 +513,15 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
         
-        // Add or update with Retail data
         retailData.forEach(retRow => {
             if (dateMap.has(retRow.date)) {
-                const existing = dateMap.get(retRow.date);
-                existing.ret_tx = retRow.orders;
-                existing.ret_wt = retRow.weight;
-                existing.ret_prem = retRow.premium;
-                existing.ret_ship = retRow.shipment;
-                existing.ret_sales = retRow.sales;
-                existing.ret_ids = retRow.ids;
+                const row = dateMap.get(retRow.date);
+                row.ret_tx = retRow.orders;
+                row.ret_wt = retRow.weight;
+                row.ret_prem = retRow.premium;
+                row.ret_ship = retRow.shipment;
+                row.ret_sales = retRow.sales;
+                row.ret_ids = retRow.ids;
             } else {
                 dateMap.set(retRow.date, {
                     date: retRow.date,
@@ -393,308 +539,257 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        // Convert map to array, calculate combined fields, and sort by date
         combinedData = Array.from(dateMap.values()).map(row => {
-            const total_sales = row.gbs_sales + row.ret_sales;
             const total_wt = row.gbs_wt + row.ret_wt;
-            
+            const total_sales = row.gbs_sales + row.ret_sales;
             return {
                 ...row,
-                total_sales: total_sales,
                 total_wt: total_wt,
-                gbs_avg: row.gbs_wt > 0 ? row.gbs_sales / row.gbs_wt : 0,
-                ret_avg: row.ret_wt > 0 ? row.ret_sales / row.ret_wt : 0,
-                total_avg: total_wt > 0 ? total_sales / total_wt : 0
+                total_sales: total_sales
             };
         });
         
-        // Sort chronologically
-        combinedData.sort((a, b) => new Date(a.date) - new Date(b.date));
+        combinedData.sort((a, b) => a.date.localeCompare(b.date));
     }
 
-    // --- Action Button Handlers ---
+    // --- Recruitment Merge ---
+    function mergeRecruitmentRows(existing, newRows) {
+        const merged = [...existing];
+        newRows.forEach(newRow => {
+            const index = merged.findIndex(r => r.code === newRow.code && r.from === newRow.from && r.to === newRow.to);
+            if (index !== -1) {
+                merged[index] = newRow; 
+            } else {
+                merged.push(newRow); 
+            }
+        });
+        return merged;
+    }
+
+    // ==========================================
+    // --- 8. PROCESS ACTIONS ---
+    // ==========================================
+    // --- Process Sales Data ---
     btnProcess.addEventListener('click', () => {
         if (!gbsData || !retailData) return;
         
-        mergeDatasets();
-        initializeDashboard();
-    });
-
-    btnReset.addEventListener('click', () => {
-        gbsData = null;
-        retailData = null;
-        combinedData = [];
-        filteredData = [];
+        mergeSalesDatasets();
         
-        // Reset file inputs
-        fileGbsInput.value = "";
-        fileRetailInput.value = "";
-        gbsFileInfo.textContent = 'Sila pilih atau tarik fail ke sini';
-        retailFileInfo.textContent = 'Sila pilih atau tarik fail ke sini';
-        
+        fileGbsInput.value = '';
+        fileRetailInput.value = '';
+        gbsFileInfo.textContent = 'Sila pilih atau tarik satu atau lebih fail ke sini';
+        retailFileInfo.textContent = 'Sila pilih atau tarik satu atau lebih fail ke sini';
         dropZoneGbs.classList.remove('has-file');
         dropZoneRetail.classList.remove('has-file');
         btnProcess.setAttribute('disabled', 'true');
         
-        // Hide dashboard
-        dashboardView.style.display = 'none';
-        uploadSection.style.display = 'block';
-        btnReset.style.display = 'none';
-        btnSaveServer.style.display = 'none';
+        initSalesDashboard();
+        saveSalesDataToServer(false);
     });
 
-    btnLoadDemo.addEventListener('click', () => {
-        generateDemoData();
-        mergeDatasets();
-        initializeDashboard();
+    // --- Process Recruitment Data ---
+    btnRecruitmentProcess.addEventListener('click', () => {
+        if (uploadedRawRecruitmentRows.length === 0) return;
+        
+        recruitmentData = mergeRecruitmentRows(recruitmentData, uploadedRawRecruitmentRows);
+        uploadedRawRecruitmentRows = [];
+        
+        fileRecruitmentInput.value = '';
+        recruitmentFileInfo.textContent = 'Sila pilih atau tarik satu atau lebih fail ke sini';
+        dropZoneRecruitment.classList.remove('has-file');
+        btnRecruitmentProcess.setAttribute('disabled', 'true');
+        
+        initRecruitmentDashboard();
+        saveRecruitmentDataToServer(false);
     });
 
-    // --- Dashboard Initialization ---
-    function initializeDashboard() {
-        // Hide upload section, show dashboard
-        uploadSection.style.display = 'none';
-        dashboardView.style.display = 'flex';
-        btnReset.style.display = 'inline-flex';
-        btnSaveServer.style.display = 'inline-flex';
-        
-        // Set date filter defaults (2026)
-        const dates = combinedData.map(d => d.date);
-        if (dates.length > 0) {
-            filterStartDate.value = dates[0];
-            filterEndDate.value = dates[dates.length - 1];
-        } else {
-            filterStartDate.value = "2026-01-01";
-            filterEndDate.value = "2026-12-31";
-        }
-        filterMonth.value = "all";
-        tableFilterMonth.value = "all";
-        tableSearch.value = "";
-        
-        // Setup filter listeners
-        [filterStartDate, filterEndDate].forEach(el => {
-            el.addEventListener('change', applyFiltersAndRefresh);
-        });
-        
-        [filterMonth, tableFilterMonth].forEach(el => {
-            el.addEventListener('change', (e) => {
-                // Synchronize month dropdowns
-                if (e.target === filterMonth) {
-                    tableFilterMonth.value = filterMonth.value;
-                } else if (e.target === tableFilterMonth) {
-                    filterMonth.value = tableFilterMonth.value;
-                }
-                applyFiltersAndRefresh();
-            });
-        });
-        
-        tableSearch.addEventListener('input', applyFiltersAndRefresh);
-        
-        applyFiltersAndRefresh();
-    }
-
-    // --- Filtering and Refreshing ---
-    function applyFiltersAndRefresh() {
-        const start = filterStartDate.value;
-        const end = filterEndDate.value;
-        const month = filterMonth.value;
-        const search = tableSearch.value.toLowerCase().trim();
-        
-        filteredData = combinedData.filter(row => {
-            // Date Range filter
-            if (start && row.date < start) return false;
-            if (end && row.date > end) return false;
-            
-            // Month filter
-            if (month !== 'all') {
-                const rowMonth = row.date.split('-')[1];
-                if (rowMonth !== month) return false;
-            }
-            
-            // Search filter (matches date string)
-            if (search) {
-                const formattedDate = formatDateMalay(row.date).toLowerCase();
-                if (!row.date.includes(search) && !formattedDate.includes(search)) return false;
-            }
-            
-            return true;
-        });
-        
-        // Recalculate KPIs
-        calculateKPIs();
-        
-        // Update Leaderboards
-        updateLeaderboards();
-        
-        // Render charts
-        renderCharts();
-        
-        // Render Table
-        currentPage = 1;
-        renderTable();
-    }
-
-    // --- KPI Calculations ---
-    function calculateKPIs() {
-        let totalSalesVal = 0;
-        let gbsSalesVal = 0;
-        let retSalesVal = 0;
-        
-        let totalWeightVal = 0;
-        let gbsWeightVal = 0;
-        let retWeightVal = 0;
-        
-        let gbsTxVal = 0;
-        let retTxVal = 0;
-        
-        let totalPremVal = 0;
-        let totalShipVal = 0;
-
-        filteredData.forEach(row => {
-            gbsSalesVal += row.gbs_sales;
-            retSalesVal += row.ret_sales;
-            totalSalesVal += row.total_sales;
-            
-            gbsWeightVal += row.gbs_wt;
-            retWeightVal += row.ret_wt;
-            totalWeightVal += row.total_wt;
-            
-            gbsTxVal += row.gbs_tx;
-            retTxVal += row.ret_tx;
-            
-            totalPremVal += row.ret_prem;
-            totalShipVal += row.ret_ship;
-        });
-
-        const avgPriceVal = totalWeightVal > 0 ? totalSalesVal / totalWeightVal : 0;
-        const gbsAvgPriceVal = gbsWeightVal > 0 ? gbsSalesVal / gbsWeightVal : 0;
-        const retAvgPriceVal = retWeightVal > 0 ? retSalesVal / retWeightVal : 0;
-
-        // Animate count up / set values
-        kpiTotalSales.textContent = formatCurrency(totalSalesVal);
-        kpiSubGbsSales.textContent = formatCurrency(gbsSalesVal);
-        kpiSubRetailSales.textContent = formatCurrency(retSalesVal);
-        
-        kpiTotalWeight.textContent = formatWeight(totalWeightVal);
-        kpiSubGbsWeight.textContent = formatWeight(gbsWeightVal);
-        kpiSubRetailWeight.textContent = formatWeight(retWeightVal);
-        
-        kpiAvgPrice.textContent = `${formatCurrency(avgPriceVal)}/g`;
-        kpiSubGbsPrice.textContent = `${formatCurrency(gbsAvgPriceVal)}/g`;
-        kpiSubRetailPrice.textContent = `${formatCurrency(retAvgPriceVal)}/g`;
-        
-        kpiTotalTx.textContent = formatNumber(gbsTxVal + retTxVal, 0);
-        kpiSubGbsTx.textContent = formatNumber(gbsTxVal, 0);
-        kpiSubRetailTx.textContent = formatNumber(retTxVal, 0);
-    }
-
-    // --- Leaderboard Ranking ---
-    function updateLeaderboards() {
-        const salesList = document.getElementById('sales-leaderboard-list');
-        const weightList = document.getElementById('weight-leaderboard-list');
-        
-        salesList.innerHTML = "";
-        weightList.innerHTML = "";
-        
-        // Group data by month
-        const monthlyData = {};
-        filteredData.forEach(row => {
-            const m = row.date.substring(0, 7); // YYYY-MM
-            if (!monthlyData[m]) {
-                monthlyData[m] = { month: m, sales: 0, weight: 0 };
-            }
-            monthlyData[m].sales += row.total_sales;
-            monthlyData[m].weight += row.total_wt;
-        });
-        
-        const monthlyArray = Object.values(monthlyData);
-        if (monthlyArray.length === 0) {
-            salesList.innerHTML = "<p class='text-muted text-center' style='padding: 20px;'>Tiada data jualan.</p>";
-            weightList.innerHTML = "<p class='text-muted text-center' style='padding: 20px;'>Tiada data berat.</p>";
+    // ==========================================
+    // --- 9. SALES DASHBOARD DISPLAY LOGIC ---
+    // ==========================================
+    function initSalesDashboard() {
+        if (combinedData.length === 0) {
+            uploadSection.style.display = 'block';
+            dashboardView.style.display = 'none';
+            btnSaveServer.style.display = 'none';
+            btnReset.style.display = 'none';
             return;
         }
-        
-        // Sort for Sales
-        const salesSorted = [...monthlyArray].sort((a, b) => b.sales - a.sales);
-        const maxSales = salesSorted[0].sales;
-        
-        // Sort for Weight
-        const weightSorted = [...monthlyArray].sort((a, b) => b.weight - a.weight);
-        const maxWeight = weightSorted[0].weight;
-        
-        // Render Sales Leaderboard
-        salesSorted.forEach((item, index) => {
-            const rank = index + 1;
-            const pctOfMax = maxSales > 0 ? (item.sales / maxSales) * 100 : 0;
-            const monthName = getMonthNameMalay(item.month.split('-')[1]) + ' ' + item.month.split('-')[0];
+
+        uploadSection.style.display = 'none';
+        dashboardView.style.display = 'block';
+        btnSaveServer.style.display = 'inline-flex';
+        btnReset.style.display = 'inline-flex';
+
+        let minDate = combinedData[0].date;
+        let maxDate = combinedData[combinedData.length - 1].date;
+
+        filterStartDate.value = minDate;
+        filterEndDate.value = maxDate;
+        filterMonth.value = 'all';
+        tableFilterMonth.value = 'all';
+        tableSearch.value = '';
+        currentPage = 1;
+
+        applySalesFilters();
+    }
+
+    function applySalesFilters() {
+        const start = filterStartDate.value;
+        const end = filterEndDate.value;
+        const monthVal = filterMonth.value;
+
+        filteredData = combinedData.filter(row => {
+            const dateInRange = (!start || row.date >= start) && (!end || row.date <= end);
             
-            let medal = "";
-            if (rank === 1) medal = "🥇 ";
-            else if (rank === 2) medal = "🥈 ";
-            else if (rank === 3) medal = "🥉 ";
-            
-            const itemDiv = document.createElement('div');
-            itemDiv.className = `leaderboard-item leaderboard-rank-${rank <= 3 ? rank : 'other'}`;
-            itemDiv.innerHTML = `
-                <div class="leaderboard-item-header">
-                    <div class="leaderboard-rank-month">
-                        <span class="leaderboard-rank-badge">${rank}</span>
-                        <span>${medal}${monthName}</span>
-                    </div>
-                    <span class="leaderboard-value">${formatCurrency(item.sales)}</span>
-                </div>
-                <div class="leaderboard-progress-bar-container">
-                    <div class="leaderboard-progress-bar" style="width: ${pctOfMax}%"></div>
-                </div>
-            `;
-            salesList.appendChild(itemDiv);
+            let monthMatch = true;
+            if (monthVal !== 'all') {
+                const rowMonth = row.date.split('-')[1];
+                monthMatch = (rowMonth === monthVal);
+            }
+            return dateInRange && monthMatch;
         });
+
+        tableFilterMonth.value = monthVal;
+
+        updateSalesKPIs();
+        renderSalesLeaderboards();
+        renderSalesCharts();
+        renderSalesTable();
+    }
+
+    function updateSalesKPIs() {
+        if (filteredData.length === 0) {
+            kpiTotalSales.textContent = 'RM 0.00';
+            kpiSubGbsSales.textContent = 'RM 0';
+            kpiSubRetailSales.textContent = 'RM 0';
+            kpiTotalWeight.textContent = '0.00 g';
+            kpiSubGbsWeight.textContent = '0 g';
+            kpiSubRetailWeight.textContent = '0 g';
+            kpiAvgPrice.textContent = 'RM 0.00/g';
+            kpiSubGbsPrice.textContent = 'RM 0/g';
+            kpiSubRetailPrice.textContent = 'RM 0/g';
+            kpiTotalTx.textContent = '0';
+            kpiSubGbsTx.textContent = '0';
+            kpiSubRetailTx.textContent = '0';
+            return;
+        }
+
+        let totalGbsSales = 0, totalRetailSales = 0;
+        let totalGbsWeight = 0, totalRetailWeight = 0;
+        let totalGbsTx = 0, totalRetailTx = 0;
+
+        filteredData.forEach(row => {
+            totalGbsSales += row.gbs_sales;
+            totalRetailSales += row.ret_sales;
+            totalGbsWeight += row.gbs_wt;
+            totalRetailWeight += row.ret_wt;
+            totalGbsTx += row.gbs_tx;
+            totalRetailTx += row.ret_tx;
+        });
+
+        const totalSales = totalGbsSales + totalRetailSales;
+        const totalWeight = totalGbsWeight + totalRetailWeight;
+        const totalTx = totalGbsTx + totalRetailTx;
+
+        const avgPrice = totalWeight > 0 ? totalSales / totalWeight : 0;
+        const avgGbsPrice = totalGbsWeight > 0 ? totalGbsSales / totalGbsWeight : 0;
+        const avgRetailPrice = totalRetailWeight > 0 ? totalRetailSales / totalRetailWeight : 0;
+
+        kpiTotalSales.textContent = `RM ${totalSales.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        kpiSubGbsSales.textContent = `RM ${Math.round(totalGbsSales).toLocaleString()}`;
+        kpiSubRetailSales.textContent = `RM ${Math.round(totalRetailSales).toLocaleString()}`;
+
+        kpiTotalWeight.textContent = `${totalWeight.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} g`;
+        kpiSubGbsWeight.textContent = `${Math.round(totalGbsWeight).toLocaleString()} g`;
+        kpiSubRetailWeight.textContent = `${Math.round(totalRetailWeight).toLocaleString()} g`;
+
+        kpiAvgPrice.textContent = `RM ${avgPrice.toFixed(2)}/g`;
+        kpiSubGbsPrice.textContent = `RM ${avgGbsPrice.toFixed(2)}/g`;
+        kpiSubRetailPrice.textContent = `RM ${avgRetailPrice.toFixed(2)}/g`;
+
+        kpiTotalTx.textContent = totalTx.toLocaleString();
+        kpiSubGbsTx.textContent = totalGbsTx.toLocaleString();
+        kpiSubRetailTx.textContent = totalRetailTx.toLocaleString();
+    }
+
+    function renderSalesLeaderboards() {
+        const monthlyBreakdown = groupSalesByMonth(filteredData);
         
-        // Render Weight Leaderboard
-        weightSorted.forEach((item, index) => {
-            const rank = index + 1;
-            const pctOfMax = maxWeight > 0 ? (item.weight / maxWeight) * 100 : 0;
-            const monthName = getMonthNameMalay(item.month.split('-')[1]) + ' ' + item.month.split('-')[0];
-            
-            let medal = "";
-            if (rank === 1) medal = "🥇 ";
-            else if (rank === 2) medal = "🥈 ";
-            else if (rank === 3) medal = "🥉 ";
-            
-            const itemDiv = document.createElement('div');
-            itemDiv.className = `leaderboard-item leaderboard-rank-${rank <= 3 ? rank : 'other'}`;
-            itemDiv.innerHTML = `
-                <div class="leaderboard-item-header">
-                    <div class="leaderboard-rank-month">
-                        <span class="leaderboard-rank-badge">${rank}</span>
-                        <span>${medal}${monthName}</span>
+        const sortedBySales = [...monthlyBreakdown].sort((a,b) => b.sales - a.sales);
+        const sortedByWeight = [...monthlyBreakdown].sort((a,b) => b.weight - a.weight);
+
+        const salesList = document.getElementById('sales-leaderboard-list');
+        const weightList = document.getElementById('weight-leaderboard-list');
+
+        salesList.innerHTML = '';
+        weightList.innerHTML = '';
+
+        if (monthlyBreakdown.length === 0) {
+            salesList.innerHTML = '<p class="text-center" style="padding: 20px; color: var(--text-muted);">Tiada data bulanan</p>';
+            weightList.innerHTML = '<p class="text-center" style="padding: 20px; color: var(--text-muted);">Tiada data bulanan</p>';
+            return;
+        }
+
+        const maxSalesVal = sortedBySales[0].sales || 1;
+        sortedBySales.forEach((m, index) => {
+            const pct = (m.sales / maxSalesVal) * 100;
+            const rankClass = index < 3 ? `leaderboard-rank-${index + 1}` : 'leaderboard-rank-other';
+            salesList.innerHTML += `
+                <div class="leaderboard-item ${rankClass}">
+                    <div class="leaderboard-rank-badge">${index + 1}</div>
+                    <div class="leaderboard-item-details">
+                        <div class="leaderboard-name">${m.monthName} 2026</div>
+                        <div class="leaderboard-progress-bar-container">
+                            <div class="leaderboard-progress-bar" style="width: ${pct}%"></div>
+                        </div>
                     </div>
-                    <span class="leaderboard-value">${formatWeight(item.weight)}</span>
-                </div>
-                <div class="leaderboard-progress-bar-container">
-                    <div class="leaderboard-progress-bar" style="width: ${pctOfMax}%"></div>
+                    <div class="leaderboard-value">RM ${Math.round(m.sales).toLocaleString()}</div>
                 </div>
             `;
-            weightList.appendChild(itemDiv);
+        });
+
+        const maxWeightVal = sortedByWeight[0].weight || 1;
+        sortedByWeight.forEach((m, index) => {
+            const pct = (m.weight / maxWeightVal) * 100;
+            const rankClass = index < 3 ? `leaderboard-rank-${index + 1}` : 'leaderboard-rank-other';
+            weightList.innerHTML += `
+                <div class="leaderboard-item ${rankClass}">
+                    <div class="leaderboard-rank-badge">${index + 1}</div>
+                    <div class="leaderboard-item-details">
+                        <div class="leaderboard-name">${m.monthName} 2026</div>
+                        <div class="leaderboard-progress-bar-container">
+                            <div class="leaderboard-progress-bar" style="width: ${pct}%"></div>
+                        </div>
+                    </div>
+                    <div class="leaderboard-value">${Math.round(m.weight).toLocaleString()} g</div>
+                </div>
+            `;
         });
     }
 
-    // --- Chart.js Rendering ---
-    function renderCharts() {
-        // Destroy existing charts to prevent memory leaks/overlap
-        // Destroy existing charts to prevent memory leaks/overlap
-        if (chartSalesTrend) chartSalesTrend.destroy();
-        if (chartWeightCompare) chartWeightCompare.destroy();
-        if (chartWeightMonthly) chartWeightMonthly.destroy();
-        if (chartPriceTrend) chartPriceTrend.destroy();
-        if (chartPriceMonthly) chartPriceMonthly.destroy();
-        if (chartContribution) chartContribution.destroy();
-        if (chartMonthlySales) chartMonthlySales.destroy();
+    function groupSalesByMonth(data) {
+        const monthNames = ["Januari", "Februari", "Mac", "April", "Mei", "Jun", "Julai", "Ogos", "September", "Oktober", "November", "Disember"];
+        const groups = {};
 
-        const labels = filteredData.map(row => formatDateShort(row.date));
-        
-        // Chart.js Global Config for Premium Light Aesthetic
-        Chart.defaults.color = '#6b5e5e';
-        Chart.defaults.font.family = "'Open Sans', sans-serif";
+        data.forEach(row => {
+            const m = row.date.split('-')[1]; // MM
+            if (!groups[m]) {
+                groups[m] = {
+                    monthKey: m,
+                    monthName: monthNames[parseInt(m)-1],
+                    sales: 0,
+                    weight: 0
+                };
+            }
+            groups[m].sales += row.total_sales;
+            groups[m].weight += row.total_wt;
+        });
+
+        return Object.values(groups).sort((a,b) => a.monthKey.localeCompare(b.monthKey));
+    }
+
+    function renderSalesCharts() {
+        const labels = filteredData.map(row => formatDisplayDate(row.date));
         
         const tooltipConfig = {
             backgroundColor: 'rgba(255, 255, 255, 0.96)',
@@ -707,8 +802,9 @@ document.addEventListener('DOMContentLoaded', () => {
             cornerRadius: 8
         };
 
-        // 1. Sales Trend Chart
+        // 1. Sales Trend
         const ctxSales = document.getElementById('chart-sales-trend').getContext('2d');
+        if (chartSalesTrend) chartSalesTrend.destroy();
         chartSalesTrend = new Chart(ctxSales, {
             type: 'line',
             data: {
@@ -752,42 +848,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 maintainAspectRatio: false,
                 plugins: {
                     tooltip: tooltipConfig,
-                    legend: {
-                        position: 'top',
-                        labels: { boxWidth: 12, usePointStyle: true, pointStyle: 'circle' }
-                    }
+                    legend: { position: 'top', labels: { boxWidth: 12, usePointStyle: true, pointStyle: 'circle' } }
                 },
                 scales: {
-                    x: { grid: { display: false } },
-                    y: { 
-                        grid: { color: 'rgba(15, 23, 42, 0.06)' },
-                        ticks: { callback: value => 'RM ' + formatCompact(value) }
-                    }
+                    y: { grid: { color: 'rgba(15, 23, 42, 0.04)' } },
+                    x: { grid: { display: false } }
                 }
             }
         });
 
-        // 2. Weight Comparison Chart
+        // 2. Weight Compare (Daily)
         const ctxWeight = document.getElementById('chart-weight-compare').getContext('2d');
+        if (chartWeightCompare) chartWeightCompare.destroy();
         chartWeightCompare = new Chart(ctxWeight, {
             type: 'bar',
             data: {
                 labels: labels,
                 datasets: [
                     {
-                        label: 'GBS Purchase (g)',
+                        label: 'GBS Weight (g)',
                         data: filteredData.map(row => row.gbs_wt),
                         backgroundColor: 'rgba(143, 29, 56, 0.85)',
-                        borderColor: '#8F1D38',
-                        borderWidth: 1,
                         borderRadius: 4
                     },
                     {
-                        label: 'Retail Sales (g)',
+                        label: 'Retail Weight (g)',
                         data: filteredData.map(row => row.ret_wt),
                         backgroundColor: 'rgba(184, 150, 13, 0.85)',
-                        borderColor: '#B8960D',
-                        borderWidth: 1,
                         borderRadius: 4
                     }
                 ]
@@ -795,853 +882,955 @@ document.addEventListener('DOMContentLoaded', () => {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    tooltip: tooltipConfig,
-                    legend: { position: 'top', labels: { boxWidth: 12 } }
-                },
+                plugins: { tooltip: tooltipConfig },
                 scales: {
-                    x: { grid: { display: false } },
-                    y: { 
-                        grid: { color: 'rgba(15, 23, 42, 0.06)' },
-                        ticks: { callback: value => formatWeight(value) }
-                    }
+                    y: { stacked: true, grid: { color: 'rgba(15, 23, 42, 0.04)' } },
+                    x: { stacked: true, grid: { display: false } }
                 }
             }
         });
 
-        // 2B. Weight Comparison Monthly Chart
-        // Group data by month for weights
-        const monthlyDataWeight = {};
-        filteredData.forEach(row => {
-            const m = row.date.substring(0, 7); // YYYY-MM
-            if (!monthlyDataWeight[m]) {
-                monthlyDataWeight[m] = { month: m, gbs_wt: 0, ret_wt: 0 };
-            }
-            monthlyDataWeight[m].gbs_wt += row.gbs_wt;
-            monthlyDataWeight[m].ret_wt += row.ret_wt;
+        // 3. Weight Compare Monthly
+        const monthlyBreakdown = groupSalesByMonth(filteredData);
+        const monthlyLabels = monthlyBreakdown.map(m => m.monthName);
+        const gbsMonthlyWts = [];
+        const retailMonthlyWts = [];
+        
+        monthlyBreakdown.forEach(m => {
+            let gbsSum = 0, retailSum = 0;
+            filteredData.forEach(row => {
+                const rMonth = row.date.split('-')[1];
+                if (rMonth === m.monthKey) {
+                    gbsSum += row.gbs_wt;
+                    retailSum += row.ret_wt;
+                }
+            });
+            gbsMonthlyWts.push(gbsSum);
+            retailMonthlyWts.push(retailSum);
         });
-
-        const weightMonthLabels = Object.keys(monthlyDataWeight).sort().map(m => {
-            const parts = m.split('-');
-            return getMonthNameMalay(parts[1]) + ' ' + parts[0];
-        });
-
-        const monthlyGbsWt = Object.keys(monthlyDataWeight).sort().map(m => monthlyDataWeight[m].gbs_wt);
-        const monthlyRetWt = Object.keys(monthlyDataWeight).sort().map(m => monthlyDataWeight[m].ret_wt);
 
         const ctxWeightMonthly = document.getElementById('chart-weight-monthly').getContext('2d');
+        if (chartWeightMonthly) chartWeightMonthly.destroy();
         chartWeightMonthly = new Chart(ctxWeightMonthly, {
             type: 'bar',
             data: {
-                labels: weightMonthLabels,
+                labels: monthlyLabels,
                 datasets: [
-                    {
-                        label: 'GBS Purchase (g)',
-                        data: monthlyGbsWt,
-                        backgroundColor: 'rgba(143, 29, 56, 0.85)',
-                        borderColor: '#8F1D38',
-                        borderWidth: 1,
-                        borderRadius: 4
-                    },
-                    {
-                        label: 'Retail Sales (g)',
-                        data: monthlyRetWt,
-                        backgroundColor: 'rgba(184, 150, 13, 0.85)',
-                        borderColor: '#B8960D',
-                        borderWidth: 1,
-                        borderRadius: 4
-                    }
+                    { label: 'GBS Weight (g)', data: gbsMonthlyWts, backgroundColor: '#8F1D38', borderRadius: 6 },
+                    { label: 'Retail Weight (g)', data: retailMonthlyWts, backgroundColor: '#B8960D', borderRadius: 6 }
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    tooltip: {
-                        ...tooltipConfig,
-                        callbacks: {
-                            label: function(context) {
-                                return ` ${context.dataset.label.split(' ')[0]}: ${formatWeight(context.raw)}`;
-                            }
-                        }
-                    },
-                    legend: { position: 'top', labels: { boxWidth: 12 } }
-                },
+                plugins: { tooltip: tooltipConfig },
                 scales: {
-                    x: { 
-                        stacked: false,
-                        grid: { display: false } 
-                    },
-                    y: { 
-                        stacked: false,
-                        grid: { color: 'rgba(15, 23, 42, 0.06)' },
-                        ticks: { callback: value => formatWeight(value) }
-                    }
+                    y: { grid: { color: 'rgba(15, 23, 42, 0.04)' } },
+                    x: { grid: { display: false } }
                 }
             }
         });
 
-        // 3. Price per Gram Trend Chart
+        // 4. Price Daily
         const ctxPrice = document.getElementById('chart-price-trend').getContext('2d');
+        if (chartPriceTrend) chartPriceTrend.destroy();
         chartPriceTrend = new Chart(ctxPrice, {
             type: 'line',
             data: {
                 labels: labels,
-                datasets: [
-                    {
-                        label: 'GBS Purata (RM/g)',
-                        data: filteredData.map(row => row.gbs_avg > 0 ? row.gbs_avg : null),
-                        borderColor: '#8F1D38',
-                        backgroundColor: 'transparent',
-                        tension: 0.3,
-                        spanGaps: true,
-                        borderWidth: 2,
-                        pointRadius: labels.length > 31 ? 0 : 2
-                    },
-                    {
-                        label: 'Retail Purata (RM/g)',
-                        data: filteredData.map(row => row.ret_avg > 0 ? row.ret_avg : null),
-                        borderColor: '#B8960D',
-                        backgroundColor: 'transparent',
-                        tension: 0.3,
-                        spanGaps: true,
-                        borderWidth: 2,
-                        pointRadius: labels.length > 31 ? 0 : 2
-                    },
-                    {
-                        label: 'Jumlah Purata (RM/g)',
-                        data: filteredData.map(row => row.total_avg > 0 ? row.total_avg : null),
-                        borderColor: '#d97706',
-                        borderDash: [5, 5],
-                        backgroundColor: 'transparent',
-                        tension: 0.3,
-                        spanGaps: true,
-                        borderWidth: 1.5,
-                        pointRadius: 0
-                    }
-                ]
+                datasets: [{
+                    label: 'Harga Emas Purata Se-Gram (RM/g)',
+                    data: filteredData.map(row => row.total_wt > 0 ? row.total_sales / row.total_wt : 0),
+                    borderColor: '#16a34a',
+                    backgroundColor: 'transparent',
+                    tension: 0.3,
+                    borderWidth: 2,
+                    pointRadius: labels.length > 31 ? 0 : 2
+                }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    tooltip: tooltipConfig,
-                    legend: { position: 'top', labels: { boxWidth: 12 } }
-                },
+                plugins: { tooltip: tooltipConfig },
                 scales: {
-                    x: { grid: { display: false } },
-                    y: { 
-                        grid: { color: 'rgba(15, 23, 42, 0.06)' },
-                        ticks: { callback: value => 'RM ' + value }
-                    }
+                    y: { grid: { color: 'rgba(15, 23, 42, 0.04)' } },
+                    x: { grid: { display: false } }
                 }
             }
         });
 
-        // 3B. Price per Gram Monthly Trend Chart
-        // Group data by month for prices
-        const monthlyDataPrice = {};
-        filteredData.forEach(row => {
-            const m = row.date.substring(0, 7); // YYYY-MM
-            if (!monthlyDataPrice[m]) {
-                monthlyDataPrice[m] = { month: m, gbs_sales: 0, gbs_wt: 0, ret_sales: 0, ret_wt: 0 };
-            }
-            monthlyDataPrice[m].gbs_sales += row.gbs_sales;
-            monthlyDataPrice[m].gbs_wt += row.gbs_wt;
-            monthlyDataPrice[m].ret_sales += row.ret_sales;
-            monthlyDataPrice[m].ret_wt += row.ret_wt;
-        });
-
-        const priceMonthLabels = Object.keys(monthlyDataPrice).sort().map(m => {
-            const parts = m.split('-');
-            return getMonthNameMalay(parts[1]) + ' ' + parts[0];
-        });
-
-        const monthlyGbsAvg = [];
-        const monthlyRetAvg = [];
-        const monthlyTotalAvg = [];
-
-        Object.keys(monthlyDataPrice).sort().forEach(m => {
-            const data = monthlyDataPrice[m];
-            const gbsAvg = data.gbs_wt > 0 ? data.gbs_sales / data.gbs_wt : null;
-            const retAvg = data.ret_wt > 0 ? data.ret_sales / data.ret_wt : null;
-            
-            const totalSales = data.gbs_sales + data.ret_sales;
-            const totalWt = data.gbs_wt + data.ret_wt;
-            const totalAvg = totalWt > 0 ? totalSales / totalWt : null;
-            
-            monthlyGbsAvg.push(gbsAvg);
-            monthlyRetAvg.push(retAvg);
-            monthlyTotalAvg.push(totalAvg);
+        // 5. Price Monthly
+        const avgMonthlyPrices = monthlyBreakdown.map(m => {
+            let mSales = 0, mWeight = 0;
+            filteredData.forEach(row => {
+                const rMonth = row.date.split('-')[1];
+                if (rMonth === m.monthKey) {
+                    mSales += row.total_sales;
+                    mWeight += row.total_wt;
+                }
+            });
+            return mWeight > 0 ? mSales / mWeight : 0;
         });
 
         const ctxPriceMonthly = document.getElementById('chart-price-monthly').getContext('2d');
+        if (chartPriceMonthly) chartPriceMonthly.destroy();
         chartPriceMonthly = new Chart(ctxPriceMonthly, {
             type: 'line',
             data: {
-                labels: priceMonthLabels,
-                datasets: [
-                    {
-                        label: 'GBS Purata Bulanan (RM/g)',
-                        data: monthlyGbsAvg,
-                        borderColor: '#8F1D38',
-                        backgroundColor: 'transparent',
-                        tension: 0.3,
-                        spanGaps: true,
-                        borderWidth: 2.5,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
-                    },
-                    {
-                        label: 'Retail Purata Bulanan (RM/g)',
-                        data: monthlyRetAvg,
-                        borderColor: '#B8960D',
-                        backgroundColor: 'transparent',
-                        tension: 0.3,
-                        spanGaps: true,
-                        borderWidth: 2.5,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
-                    },
-                    {
-                        label: 'Jumlah Purata Bulanan (RM/g)',
-                        data: monthlyTotalAvg,
-                        borderColor: '#d97706',
-                        borderDash: [5, 5],
-                        backgroundColor: 'transparent',
-                        tension: 0.3,
-                        spanGaps: true,
-                        borderWidth: 1.5,
-                        pointRadius: 0
-                    }
-                ]
+                labels: monthlyLabels,
+                datasets: [{
+                    label: 'Harga Emas Purata Se-Gram Bulanan (RM/g)',
+                    data: avgMonthlyPrices,
+                    borderColor: '#16a34a',
+                    backgroundColor: 'rgba(22, 163, 74, 0.05)',
+                    fill: true,
+                    tension: 0.3,
+                    borderWidth: 3,
+                    pointRadius: 4
+                }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    tooltip: {
-                        ...tooltipConfig,
-                        callbacks: {
-                            label: function(context) {
-                                return ` ${context.dataset.label.split(' ')[0]} Purata: ${formatCurrency(context.raw)}/g`;
-                            }
-                        }
-                    },
-                    legend: { position: 'top', labels: { boxWidth: 12 } }
-                },
+                plugins: { tooltip: tooltipConfig },
                 scales: {
-                    x: { grid: { display: false } },
-                    y: { 
-                        grid: { color: 'rgba(15, 23, 42, 0.06)' },
-                        ticks: { callback: value => 'RM ' + value }
-                    }
+                    y: { grid: { color: 'rgba(15, 23, 42, 0.04)' } },
+                    x: { grid: { display: false } }
                 }
             }
         });
 
-        // 4. Monthly Sales Contribution (%) - 100% Stacked Bar Chart
-        const monthlyDataContrib = {};
+        // 6. Channel Contribution
+        let totalGbs = 0, totalRetail = 0;
         filteredData.forEach(row => {
-            const m = row.date.substring(0, 7); // YYYY-MM
-            if (!monthlyDataContrib[m]) {
-                monthlyDataContrib[m] = { gbs: 0, retail: 0 };
-            }
-            monthlyDataContrib[m].gbs += row.gbs_sales;
-            monthlyDataContrib[m].retail += row.ret_sales;
-        });
-
-        const contribMonthLabels = Object.keys(monthlyDataContrib).sort().map(m => {
-            const parts = m.split('-');
-            return getMonthNameMalay(parts[1]) + ' ' + parts[0];
-        });
-
-        const contribGbsPcts = [];
-        const contribRetPcts = [];
-        const contribGbsVals = [];
-        const contribRetVals = [];
-
-        Object.keys(monthlyDataContrib).sort().forEach(m => {
-            const gbsVal = monthlyDataContrib[m].gbs;
-            const retVal = monthlyDataContrib[m].retail;
-            const total = gbsVal + retVal;
-            
-            contribGbsVals.push(gbsVal);
-            contribRetVals.push(retVal);
-            
-            if (total > 0) {
-                contribGbsPcts.push(parseFloat(((gbsVal / total) * 100).toFixed(2)));
-                contribRetPcts.push(parseFloat(((retVal / total) * 100).toFixed(2)));
-            } else {
-                contribGbsPcts.push(0);
-                contribRetPcts.push(0);
-            }
+            totalGbs += row.gbs_sales;
+            totalRetail += row.ret_sales;
         });
         
         const ctxContrib = document.getElementById('chart-contribution').getContext('2d');
+        if (chartContribution) chartContribution.destroy();
         chartContribution = new Chart(ctxContrib, {
-            type: 'bar',
+            type: 'doughnut',
             data: {
-                labels: contribMonthLabels,
-                datasets: [
-                    {
-                        label: 'GBS Purchase (%)',
-                        data: contribGbsPcts,
-                        backgroundColor: 'rgba(143, 29, 56, 0.85)',
-                        borderRadius: 4
-                    },
-                    {
-                        label: 'Retail Sales (%)',
-                        data: contribRetPcts,
-                        backgroundColor: 'rgba(184, 150, 13, 0.85)',
-                        borderRadius: 4
-                    }
-                ]
+                labels: ['GBS Purchases', 'Retail Sales'],
+                datasets: [{
+                    data: [totalGbs, totalRetail],
+                    backgroundColor: ['#8F1D38', '#B8960D'],
+                    borderWidth: 2
+                }]
             },
-            plugins: [{
-                id: 'percentageLabels',
-                afterDatasetsDraw(chart) {
-                    const { ctx } = chart;
-                    ctx.save();
-                    ctx.font = 'bold 11px \'Open Sans\', sans-serif';
-                    ctx.fillStyle = '#2A2A2A';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'bottom';
-
-                    chart.data.datasets.forEach((dataset, i) => {
-                        const meta = chart.getDatasetMeta(i);
-                        meta.data.forEach((bar, index) => {
-                            const val = dataset.data[index];
-                            if (val > 0) {
-                                ctx.fillText(val.toFixed(1) + '%', bar.x, bar.y - 5);
-                            }
-                        });
-                    });
-                    ctx.restore();
-                }
-            }],
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: {
-                    x: { 
-                        stacked: false,
-                        grid: { display: false } 
-                    },
-                    y: { 
-                        stacked: false,
-                        min: 0,
-                        max: 100,
-                        grid: { color: 'rgba(15, 23, 42, 0.06)' },
-                        ticks: { callback: value => value + '%' }
-                    }
-                },
-                plugins: {
-                    tooltip: {
-                        ...tooltipConfig,
-                        callbacks: {
-                            label: function(context) {
-                                const datasetIndex = context.datasetIndex;
-                                const index = context.dataIndex;
-                                const pct = context.raw;
-                                if (datasetIndex === 0) {
-                                    return ` GBS Purchase: ${pct}% (${formatCurrency(contribGbsVals[index])})`;
-                                } else {
-                                    return ` Retail Sales: ${pct}% (${formatCurrency(contribRetVals[index])})`;
-                                }
-                            }
-                        }
-                    },
-                    legend: { position: 'top', labels: { boxWidth: 12 } }
+                plugins: { tooltip: tooltipConfig },
+                cutout: '60%'
+            }
+        });
+
+        // 7. Monthly Sales Summary Stack
+        const gbsMonthlySales = [];
+        const retailMonthlySales = [];
+        monthlyBreakdown.forEach(m => {
+            let gbsSum = 0, retailSum = 0;
+            filteredData.forEach(row => {
+                const rMonth = row.date.split('-')[1];
+                if (rMonth === m.monthKey) {
+                    gbsSum += row.gbs_sales;
+                    retailSum += row.ret_sales;
                 }
-            }
+            });
+            gbsMonthlySales.push(gbsSum);
+            retailMonthlySales.push(retailSum);
         });
-
-        // 5. Monthly Breakdown Stacked Bar Chart
-        // Group data by month
-        const monthlyData = {};
-        filteredData.forEach(row => {
-            const m = row.date.substring(0, 7); // YYYY-MM
-            if (!monthlyData[m]) {
-                monthlyData[m] = { gbs: 0, retail: 0 };
-            }
-            monthlyData[m].gbs += row.gbs_sales;
-            monthlyData[m].retail += row.ret_sales;
-        });
-
-        const monthLabels = Object.keys(monthlyData).sort().map(m => {
-            const parts = m.split('-');
-            return getMonthNameMalay(parts[1]) + ' ' + parts[0];
-        });
-
-        const monthGbsVals = Object.keys(monthlyData).sort().map(m => monthlyData[m].gbs);
-        const monthRetVals = Object.keys(monthlyData).sort().map(m => monthlyData[m].retail);
 
         const ctxMonthly = document.getElementById('chart-monthly-sales').getContext('2d');
+        if (chartMonthlySales) chartMonthlySales.destroy();
         chartMonthlySales = new Chart(ctxMonthly, {
             type: 'bar',
             data: {
-                labels: monthLabels,
+                labels: monthlyLabels,
                 datasets: [
-                    {
-                        label: 'GBS Purchase',
-                        data: monthGbsVals,
-                        backgroundColor: 'rgba(143, 29, 56, 0.85)',
-                        borderRadius: 4
-                    },
-                    {
-                        label: 'Retail Sales',
-                        data: monthRetVals,
-                        backgroundColor: 'rgba(184, 150, 13, 0.85)',
-                        borderRadius: 4
-                    }
+                    { label: 'GBS Purchases (RM)', data: gbsMonthlySales, backgroundColor: '#8F1D38', borderRadius: 6 },
+                    { label: 'Retail Sales (RM)', data: retailMonthlySales, backgroundColor: '#B8960D', borderRadius: 6 }
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                plugins: { tooltip: tooltipConfig },
                 scales: {
-                    x: { 
-                        stacked: false,
-                        grid: { display: false } 
-                    },
-                    y: { 
-                        stacked: false,
-                        grid: { color: 'rgba(15, 23, 42, 0.06)' },
-                        ticks: { callback: value => 'RM ' + formatCompact(value) }
-                    }
-                },
-                plugins: {
-                    tooltip: tooltipConfig,
-                    legend: { position: 'top', labels: { boxWidth: 12 } }
+                    y: { grid: { color: 'rgba(15, 23, 42, 0.04)' } },
+                    x: { grid: { display: false } }
                 }
             }
         });
     }
 
-    // --- Table Sorting & Rendering ---
-    function sortData(column) {
-        if (currentSortColumn === column) {
-            currentSortAscending = !currentSortAscending;
-        } else {
-            currentSortColumn = column;
-            currentSortAscending = true;
-        }
+    function renderSalesTable() {
+        const query = tableSearch.value.toLowerCase().trim();
+        const monthVal = tableFilterMonth.value;
 
-        filteredData.sort((a, b) => {
-            let valA, valB;
-            
-            switch(column) {
-                case 'date':
-                    valA = new Date(a.date);
-                    valB = new Date(b.date);
-                    break;
-                case 'gbs_tx':
-                    valA = a.gbs_tx; valB = b.gbs_tx; break;
-                case 'gbs_wt':
-                    valA = a.gbs_wt; valB = b.gbs_wt; break;
-                case 'gbs_sales':
-                    valA = a.gbs_sales; valB = b.gbs_sales; break;
-                case 'ret_tx':
-                    valA = a.ret_tx; valB = b.ret_tx; break;
-                case 'ret_wt':
-                    valA = a.ret_wt; valB = b.ret_wt; break;
-                case 'ret_prem':
-                    valA = a.ret_prem; valB = b.ret_prem; break;
-                case 'ret_sales':
-                    valA = a.ret_sales; valB = b.ret_sales; break;
-                case 'total_wt':
-                    valA = a.total_wt; valB = b.total_wt; break;
-                case 'total_sales':
-                    valA = a.total_sales; valB = b.total_sales; break;
-                default:
-                    valA = a.date; valB = b.date;
+        let tableData = filteredData.filter(row => {
+            const dateMatch = formatDisplayDate(row.date).includes(query);
+            let monthMatch = true;
+            if (monthVal !== 'all') {
+                const rowMonth = row.date.split('-')[1];
+                monthMatch = (rowMonth === monthVal);
             }
-
-            if (valA < valB) return currentSortAscending ? -1 : 1;
-            if (valA > valB) return currentSortAscending ? 1 : -1;
-            return 0;
+            return dateMatch && monthMatch;
         });
 
-        renderTable();
-    }
-
-    // Attach Table Header Sort Event Listeners
-    document.querySelectorAll('.data-table th.sortable').forEach(th => {
-        th.addEventListener('click', () => {
-            const sortCol = th.getAttribute('data-sort');
-            sortData(sortCol);
+        tableData.sort((a, b) => {
+            let valA = a[currentSortColumn];
+            let valB = b[currentSortColumn];
             
-            // Update UI sort indicators
-            document.querySelectorAll('.data-table th i').forEach(icon => {
-                icon.className = 'fa-solid fa-sort';
-            });
-            const activeIcon = th.querySelector('i');
-            if (currentSortAscending) {
-                activeIcon.className = 'fa-solid fa-sort-up text-gold';
-            } else {
-                activeIcon.className = 'fa-solid fa-sort-down text-gold';
+            if (currentSortColumn === 'date') {
+                return currentSortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
             }
+            return currentSortAscending ? valA - valB : valB - valA;
         });
-    });
 
-    function renderTable() {
-        tableBody.innerHTML = "";
-        
-        const totalRows = filteredData.length;
-        if (totalRows === 0) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="12" class="text-center" style="padding: 40px; color: var(--text-muted);">
-                        <i class="fa-solid fa-folder-open" style="font-size: 24px; margin-bottom: 8px; display: block;"></i>
-                        Tiada data dijumpai bagi penapis semasa.
-                    </td>
-                </tr>
-            `;
-            paginationInfo.textContent = "Menunjukkan 0 hingga 0 daripada 0 entri";
-            paginationControls.innerHTML = "";
-            return;
-        }
+        const totalRows = tableData.length;
+        const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
+        if (currentPage > totalPages) currentPage = totalPages;
 
         const startIndex = (currentPage - 1) * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, totalRows);
-        const pageData = filteredData.slice(startIndex, endIndex);
+        const paginatedData = tableData.slice(startIndex, endIndex);
 
-        pageData.forEach(row => {
-            const tr = document.createElement('tr');
-            
-            tr.innerHTML = `
-                <td class="cell-date text-center">${formatDateMalay(row.date)}</td>
-                
-                <td class="cell-gbs text-center">${row.gbs_tx || '-'}</td>
-                <td class="cell-gbs text-right">${row.gbs_wt > 0 ? formatNumber(row.gbs_wt, 4) : '-'}</td>
-                <td class="cell-gbs text-right">${row.gbs_sales > 0 ? formatCurrency(row.gbs_sales) : '-'}</td>
-                <td class="cell-gbs text-right text-muted">${row.gbs_avg > 0 ? formatCurrency(row.gbs_avg) + '/g' : '-'}</td>
-                
-                <td class="cell-retail text-center">${row.ret_tx || '-'}</td>
-                <td class="cell-retail text-right">${row.ret_wt > 0 ? formatNumber(row.ret_wt, 4) : '-'}</td>
-                <td class="cell-retail text-right text-muted">${row.ret_prem > 0 ? formatCurrency(row.ret_prem) : '-'}</td>
-                <td class="cell-retail text-right">${row.ret_sales > 0 ? formatCurrency(row.ret_sales) : '-'}</td>
-                <td class="cell-retail text-right text-muted">${row.ret_avg > 0 ? formatCurrency(row.ret_avg) + '/g' : '-'}</td>
-                
-                <td class="cell-combined text-right">${row.total_wt > 0 ? formatNumber(row.total_wt, 4) : '-'}</td>
-                <td class="cell-combined text-right">${row.total_sales > 0 ? formatCurrency(row.total_sales) : '-'}</td>
-                <td class="cell-combined text-right">${row.total_avg > 0 ? formatCurrency(row.total_avg) + '/g' : '-'}</td>
+        tableBody.innerHTML = '';
+        if (paginatedData.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="13" class="text-center" style="padding: 30px; color: var(--text-muted);">Tiada data jualan ditemui</td></tr>`;
+            paginationInfo.textContent = `Menunjukkan 0 hingga 0 daripada 0 entri`;
+            paginationControls.innerHTML = '';
+            return;
+        }
+
+        paginatedData.forEach(row => {
+            const gbsAvg = row.gbs_wt > 0 ? row.gbs_sales / row.gbs_wt : 0;
+            const retAvg = row.ret_wt > 0 ? row.ret_sales / row.ret_wt : 0;
+            const totAvg = row.total_wt > 0 ? row.total_sales / row.total_wt : 0;
+
+            tableBody.innerHTML += `
+                <tr>
+                    <td class="text-center font-weight-bold">${formatDisplayDate(row.date)}</td>
+                    <td class="text-center">${row.gbs_tx.toLocaleString()}</td>
+                    <td class="text-right">${row.gbs_wt.toFixed(2)}</td>
+                    <td class="text-right">RM ${Math.round(row.gbs_sales).toLocaleString()}</td>
+                    <td class="text-right font-muted">RM ${gbsAvg.toFixed(2)}</td>
+                    
+                    <td class="text-center">${row.ret_tx.toLocaleString()}</td>
+                    <td class="text-right">${row.ret_wt.toFixed(2)}</td>
+                    <td class="text-right">RM ${Math.round(row.ret_prem).toLocaleString()}</td>
+                    <td class="text-right">RM ${Math.round(row.ret_sales).toLocaleString()}</td>
+                    <td class="text-right font-muted">RM ${retAvg.toFixed(2)}</td>
+                    
+                    <td class="text-right font-weight-bold" style="background: rgba(184, 150, 13, 0.02);">${row.total_wt.toFixed(2)}</td>
+                    <td class="text-right font-weight-bold" style="background: rgba(184, 150, 13, 0.02);">RM ${Math.round(row.total_sales).toLocaleString()}</td>
+                    <td class="text-right font-weight-bold font-muted" style="background: rgba(184, 150, 13, 0.02);">RM ${totAvg.toFixed(2)}</td>
+                </tr>
             `;
-            
-            tableBody.appendChild(tr);
         });
 
-        // Update pagination details
         paginationInfo.textContent = `Menunjukkan ${startIndex + 1} hingga ${endIndex} daripada ${totalRows} entri`;
-        
-        renderPaginationControls(totalRows);
+        renderSalesPaginationButtons(totalPages);
     }
 
-    function renderPaginationControls(totalRows) {
-        paginationControls.innerHTML = "";
-        const totalPages = Math.ceil(totalRows / rowsPerPage);
-        
+    function renderSalesPaginationButtons(totalPages) {
+        paginationControls.innerHTML = '';
         if (totalPages <= 1) return;
 
-        // Previous Button
         const prevBtn = document.createElement('button');
-        prevBtn.className = 'page-btn';
+        prevBtn.className = 'btn btn-outline btn-sm';
         prevBtn.innerHTML = '<i class="fa-solid fa-chevron-left"></i>';
         prevBtn.disabled = currentPage === 1;
-        prevBtn.addEventListener('click', () => {
-            if (currentPage > 1) {
-                currentPage--;
-                renderTable();
-            }
-        });
+        prevBtn.onclick = () => { currentPage--; renderSalesTable(); };
         paginationControls.appendChild(prevBtn);
 
-        // Page Number Buttons (Max 5 displayed)
         let startPage = Math.max(1, currentPage - 2);
         let endPage = Math.min(totalPages, startPage + 4);
-        if (endPage - startPage < 4) {
-            startPage = Math.max(1, endPage - 4);
-        }
+        if (endPage - startPage < 4) startPage = Math.max(1, endPage - 4);
 
         for (let i = startPage; i <= endPage; i++) {
             const pageBtn = document.createElement('button');
-            pageBtn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+            pageBtn.className = `btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-outline'}`;
             pageBtn.textContent = i;
-            pageBtn.addEventListener('click', () => {
-                currentPage = i;
-                renderTable();
-            });
+            pageBtn.onclick = () => { currentPage = i; renderSalesTable(); };
             paginationControls.appendChild(pageBtn);
         }
 
-        // Next Button
         const nextBtn = document.createElement('button');
-        nextBtn.className = 'page-btn';
+        nextBtn.className = 'btn btn-outline btn-sm';
         nextBtn.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
         nextBtn.disabled = currentPage === totalPages;
-        nextBtn.addEventListener('click', () => {
-            if (currentPage < totalPages) {
-                currentPage++;
-                renderTable();
-            }
-        });
+        nextBtn.onclick = () => { currentPage++; renderSalesTable(); };
         paginationControls.appendChild(nextBtn);
     }
 
-    // --- Export Functions ---
+    // --- Sales Header Sorter Interactions ---
+    document.querySelectorAll('#combined-table th.sortable').forEach(th => {
+        th.addEventListener('click', () => {
+            const sortCol = th.getAttribute('data-sort');
+            if (currentSortColumn === sortCol) {
+                currentSortAscending = !currentSortAscending;
+            } else {
+                currentSortColumn = sortCol;
+                currentSortAscending = true;
+            }
+            document.querySelectorAll('#combined-table th.sortable i').forEach(icon => icon.className = 'fa-solid fa-sort');
+            th.querySelector('i').className = currentSortAscending ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down';
+            renderSalesTable();
+        });
+    });
+
+    // --- Sales Filters Event Listeners ---
+    filterStartDate.addEventListener('change', applySalesFilters);
+    filterEndDate.addEventListener('change', applySalesFilters);
+    filterMonth.addEventListener('change', (e) => { filterMonth.value = e.target.value; applySalesFilters(); });
+    tableFilterMonth.addEventListener('change', (e) => { filterMonth.value = e.target.value; applySalesFilters(); });
+    tableSearch.addEventListener('input', () => { currentPage = 1; renderSalesTable(); });
+
+    // --- Save/Load/Reset Sales Server ---
+    btnSaveServer.addEventListener('click', () => saveSalesDataToServer(true));
+
+    function saveSalesDataToServer(showAlert) {
+        if (combinedData.length === 0) return;
+        btnSaveServer.setAttribute('disabled', 'true');
+        btnSaveServer.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+        
+        fetch('save_data.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'sales', key: 'gbgold2026', data: combinedData })
+        })
+        .then(response => response.json())
+        .then(res => {
+            btnSaveServer.removeAttribute('disabled');
+            btnSaveServer.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Simpan ke Server';
+            if (res.success) {
+                if (showAlert) alert('Berjaya menyimpan data jualan ke server.');
+            } else {
+                alert('Ralat menyimpan: ' + res.message);
+            }
+        })
+        .catch(err => {
+            btnSaveServer.removeAttribute('disabled');
+            btnSaveServer.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Simpan ke Server';
+            alert('Ralat rangkaian: ' + err.message);
+        });
+    }
+
+    function loadSalesDataFromServer() {
+        fetch('data.json?v=' + Date.now())
+        .then(response => { if (!response.ok) throw new Error(); return response.json(); })
+        .then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+                combinedData = data;
+                initSalesDashboard();
+            }
+        })
+        .catch(() => initSalesDashboard());
+    }
+
+    btnReset.addEventListener('click', () => {
+        if (confirm('Kosongkan semua data jualan sedia ada? Halaman akan dimuat semula.')) {
+            fetch('save_data.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'sales', key: 'gbgold2026', data: [] })
+            }).then(() => { combinedData = []; location.reload(); });
+        }
+    });
+
+    // --- Export Sales CSV & Excel ---
     btnExportCsv.addEventListener('click', () => {
         if (filteredData.length === 0) return;
-        
-        let csvContent = "Tarikh,GBS Transaksi,GBS Berat (g),GBS Jualan (RM),GBS Purata (RM/g),Retail Pesanan,Retail Berat (g),Retail Premium (RM),Retail Jualan (RM),Retail Purata (RM/g),Jumlah Berat (g),Jumlah Jualan (RM),Jumlah Purata (RM/g)\n";
-        
+        let csv = "Tarikh,GBS Tx,GBS Berat(g),GBS Jualan(RM),Retail Pesanan,Retail Berat(g),Retail Premium(RM),Retail Jualan(RM),Jumlah Combined Berat(g),Jumlah Combined Jualan(RM)\n";
         filteredData.forEach(row => {
-            csvContent += `${row.date},${row.gbs_tx},${row.gbs_wt},${row.gbs_sales},${row.gbs_avg.toFixed(4)},${row.ret_tx},${row.ret_wt},${row.ret_prem},${row.ret_sales},${row.ret_avg.toFixed(4)},${row.total_wt},${row.total_sales},${row.total_avg.toFixed(4)}\n`;
+            csv += `${formatDisplayDate(row.date)},${row.gbs_tx},${row.gbs_wt.toFixed(2)},${row.gbs_sales.toFixed(2)},${row.ret_tx},${row.ret_wt.toFixed(2)},${row.ret_prem.toFixed(2)},${row.ret_sales.toFixed(2)},${row.total_wt.toFixed(2)},${row.total_sales.toFixed(2)}\n`;
         });
-        
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", `gbgold_combined_sales_report_${new Date().toISOString().split('T')[0]}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        triggerDownload(csv, 'csv', 'Laporan_Jualan_GBGold');
     });
 
     btnExportXlsx.addEventListener('click', () => {
         if (filteredData.length === 0) return;
-        
-        // Prepare data for Excel
         const excelRows = filteredData.map(row => ({
-            "Tarikh": formatDateMalay(row.date),
-            "GBS Transaksi": row.gbs_tx,
+            "Tarikh": formatDisplayDate(row.date),
+            "GBS Tx": row.gbs_tx,
             "GBS Berat (g)": row.gbs_wt,
             "GBS Jualan (RM)": row.gbs_sales,
-            "GBS Purata (RM/g)": row.gbs_avg,
             "Retail Pesanan": row.ret_tx,
             "Retail Berat (g)": row.ret_wt,
             "Retail Premium (RM)": row.ret_prem,
             "Retail Jualan (RM)": row.ret_sales,
-            "Retail Purata (RM/g)": row.ret_avg,
             "Combined Berat (g)": row.total_wt,
-            "Combined Jualan (RM)": row.total_sales,
-            "Combined Purata (RM/g)": row.total_avg
+            "Combined Jualan (RM)": row.total_sales
         }));
-        
-        const worksheet = XLSX.utils.json_to_sheet(excelRows);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Laporan Gabungan 2026");
-        
-        // Add styling properties (column widths)
-        const wscols = [
-            { wch: 15 }, // Tarikh
-            { wch: 15 }, // GBS Tx
-            { wch: 15 }, // GBS Weight
-            { wch: 15 }, // GBS Sales
-            { wch: 18 }, // GBS Avg
-            { wch: 15 }, // Retail Orders
-            { wch: 15 }, // Retail Weight
-            { wch: 18 }, // Retail Premium
-            { wch: 15 }, // Retail Sales
-            { wch: 18 }, // Retail Avg
-            { wch: 18 }, // Combined Weight
-            { wch: 18 }, // Combined Sales
-            { wch: 20 }  // Combined Avg
-        ];
-        worksheet['!cols'] = wscols;
-        
-        XLSX.writeFile(workbook, `gbgold_combined_sales_report_${new Date().toISOString().split('T')[0]}.xlsx`);
+        const ws = XLSX.utils.json_to_sheet(excelRows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Jualan");
+        XLSX.writeFile(wb, `Laporan_Jualan_GBGold_${new Date().toISOString().split('T')[0]}.xlsx`);
     });
 
-    // --- Helper Formatting Functions ---
-    function formatCurrency(val) {
-        return 'RM ' + val.toLocaleString('ms-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    function triggerDownload(content, type, name) {
+        const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `${name}_${new Date().toISOString().split('T')[0]}.${type}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
-    function formatNumber(val, decimals = 2) {
-        return val.toLocaleString('ms-MY', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-    }
-
-    function formatWeight(grams) {
-        if (grams >= 1000) {
-            const kg = grams / 1000;
-            // 3 decimal places for kg (e.g., 5.124 kg) is very close to the actual grams
-            return kg.toLocaleString('ms-MY', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg';
-        }
-        return grams.toLocaleString('ms-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' g';
-    }
-
-    function formatCompact(val) {
-        return val.toLocaleString('ms-MY', { notation: 'compact', compactDisplay: 'short' });
-    }
-
-    function formatBytes(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
-
-    function formatDateMalay(dateStr) {
-        const parts = dateStr.split('-');
-        return `${parts[2]}/${parts[1]}/${parts[0]}`;
-    }
-
-    function formatDateShort(dateStr) {
-        const parts = dateStr.split('-');
-        // Return DD/MM
-        return `${parts[2]}/${parts[1]}`;
-    }
-
-    function getMonthNameMalay(monthNum) {
-        const months = {
-            '01': 'Januari', '02': 'Februari', '03': 'Mac', '04': 'April',
-            '05': 'Mei', '06': 'Jun', '07': 'Julai', '08': 'Ogos',
-            '09': 'September', '10': 'Oktober', '11': 'November', '12': 'Disember'
-        };
-        return months[monthNum] || monthNum;
-    }
-
-    // --- Demo Data Generator ---
-    function generateDemoData() {
-        const start = new Date("2026-01-01");
-        const end = new Date("2026-05-31");
-        
-        gbsData = [];
-        retailData = [];
-        
-        let current = new Date(start);
-        let idCounter = 111386;
-        let orderCounter = 7923;
-        
-        // Base gold price fluctuating around RM 380 - RM 420 per gram
-        let baseGoldPrice = 390;
-        
-        while (current <= end) {
-            const dateStr = current.toISOString().split('T')[0];
-            const isWeekend = current.getDay() === 0 || current.getDay() === 6;
-            
-            // Fluctuating gold price day-by-day
-            baseGoldPrice += (Math.random() - 0.5) * 4;
-            baseGoldPrice = Math.max(360, Math.min(440, baseGoldPrice));
-            
-            // 1. Generate GBS Purchase Data
-            // Weekends have lower transactions usually, or sometimes spikes
-            const gbsTx = Math.round(isWeekend ? (30 + Math.random() * 80) : (50 + Math.random() * 150));
-            const gbsWeight = gbsTx * (0.5 + Math.random() * 1.5); // avg 1-2g per tx
-            const gbsSales = gbsWeight * (baseGoldPrice + (Math.random() - 0.5) * 5);
-            
-            const gbsIdsList = [];
-            for (let i = 0; i < 5 && i < gbsTx; i++) {
-                gbsIdsList.push(`CPO-00${idCounter + i}`);
-            }
-            idCounter += gbsTx;
-            if (gbsTx > 5) gbsIdsList.push('...');
-            
-            gbsData.push({
-                date: dateStr,
-                transactions: gbsTx,
-                weight: gbsWeight,
-                sales: gbsSales,
-                ids: gbsIdsList.join(', ')
-            });
-            
-            // 2. Generate Retail Daily Sales Data
-            // Less frequency, higher variance in orders
-            const retTx = Math.round(isWeekend ? (2 + Math.random() * 8) : (4 + Math.random() * 14));
-            const retWeight = retTx * (2 + Math.random() * 8); // avg 2-10g per order (higher weights in retail)
-            const retPremium = retTx * (15 + Math.round(Math.random() * 40)); // RM 15-55 premium per order
-            const retShipment = retTx * (Math.random() > 0.3 ? 10 : 0); // RM 10 shipment fee sometimes
-            // Retail sales include base price + premium + shipping
-            const retSales = (retWeight * (baseGoldPrice + 15)) + retPremium + retShipment;
-            
-            const retIdsList = [];
-            for (let i = 0; i < 3 && i < retTx; i++) {
-                retIdsList.push(`#0000${orderCounter + i}`);
-            }
-            orderCounter += retTx;
-            if (retTx > 3) retIdsList.push('...');
-            
-            retailData.push({
-                date: dateStr,
-                orders: retTx,
-                weight: retWeight,
-                premium: retPremium,
-                shipment: retShipment,
-                sales: retSales,
-                ids: retIdsList.join(', ')
-            });
-            
-            // Advance 1 day
-            current.setDate(current.getDate() + 1);
-        }
-    }
-
-    // --- Save to Server Event ---
-    btnSaveServer.addEventListener('click', () => {
-        if (combinedData.length === 0) {
-            alert("Tiada data untuk disimpan!");
+    // ==========================================
+    // --- 10. RECRUITMENT DISPLAY LOGIC ---
+    // ==========================================
+    function initRecruitmentDashboard() {
+        if (recruitmentData.length === 0) {
+            recruitmentUploadSection.style.display = 'block';
+            recruitmentDashboardView.style.display = 'none';
+            btnRecruitmentSaveServer.style.display = 'none';
+            btnRecruitmentReset.style.display = 'none';
             return;
         }
 
-        const key = prompt("Sila masukkan Kata Laluan Keselamatan untuk menyimpan data ke server:");
-        if (key === null) return; // User cancelled
-        if (!key) {
-            alert("Kata laluan keselamatan diperlukan!");
+        recruitmentUploadSection.style.display = 'none';
+        recruitmentDashboardView.style.display = 'block';
+        btnRecruitmentSaveServer.style.display = 'inline-flex';
+        btnRecruitmentReset.style.display = 'inline-flex';
+
+        let minDate = recruitmentData[0].from;
+        let maxDate = recruitmentData[0].to;
+        recruitmentData.forEach(r => {
+            if (r.from < minDate) minDate = r.from;
+            if (r.to > maxDate) maxDate = r.to;
+        });
+
+        filterRecruitmentStartDate.value = minDate;
+        filterRecruitmentEndDate.value = maxDate;
+        filterRecruitmentMonth.value = 'all';
+        tableRecruitmentFilterMonth.value = 'all';
+        tableRecruitmentSearch.value = '';
+        currentRecruitmentPage = 1;
+
+        applyRecruitmentFilters();
+    }
+
+    function applyRecruitmentFilters() {
+        const start = filterRecruitmentStartDate.value;
+        const end = filterRecruitmentEndDate.value;
+        const monthVal = filterRecruitmentMonth.value;
+
+        filteredRecruitmentData = recruitmentData.filter(row => {
+            const dateFromInRange = (!start || row.from >= start);
+            const dateToInRange = (!end || row.to <= end);
+            
+            let monthMatch = true;
+            if (monthVal !== 'all') {
+                const rowMonth = row.from.split('-')[1];
+                monthMatch = (rowMonth === monthVal);
+            }
+            return dateFromInRange && dateToInRange && monthMatch;
+        });
+
+        tableRecruitmentFilterMonth.value = monthVal;
+
+        updateRecruitmentKPIs();
+        renderRecruitmentCharts();
+        renderRecruitmentTable();
+    }
+
+    function updateRecruitmentKPIs() {
+        if (filteredRecruitmentData.length === 0) {
+            kpiTotalReferrals.textContent = '0';
+            kpiTotalRecruiters.textContent = '0';
+            kpiAvgReferrals.textContent = '0.0';
+            kpiTopRecruiterName.textContent = 'Tiada';
+            kpiTopRecruiterCode.textContent = '-';
+            kpiTopRecruiterCount.textContent = '0';
             return;
         }
 
-        // Change button state to loading
-        const originalText = btnSaveServer.innerHTML;
-        btnSaveServer.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
-        btnSaveServer.setAttribute('disabled', 'true');
+        let totalReferrals = 0;
+        const recruiterMap = new Map();
 
-        fetch('save_data.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ key: key, data: combinedData })
-        })
-        .then(res => res.json())
-        .then(res => {
-            if (res.success) {
-                alert("Berjaya! " + res.message);
+        filteredRecruitmentData.forEach(row => {
+            totalReferrals += row.referrals;
+            if (recruiterMap.has(row.code)) {
+                recruiterMap.get(row.code).referrals += row.referrals;
             } else {
-                alert("Gagal: " + res.message);
+                recruiterMap.set(row.code, { code: row.code, name: row.name, referrals: row.referrals });
             }
-        })
-        .catch(err => {
-            alert("Ralat sambungan ke server: " + err.message);
-        })
-        .finally(() => {
-            btnSaveServer.innerHTML = originalText;
-            btnSaveServer.removeAttribute('disabled');
+        });
+
+        const recruitersList = Array.from(recruiterMap.values());
+        const totalRecruiters = recruitersList.length;
+        const avgReferrals = totalRecruiters > 0 ? (totalReferrals / totalRecruiters).toFixed(1) : '0.0';
+
+        let topRecruiter = { name: 'Tiada', code: '-', referrals: 0 };
+        recruitersList.forEach(rec => {
+            if (rec.referrals > topRecruiter.referrals) topRecruiter = rec;
+        });
+
+        kpiTotalReferrals.textContent = totalReferrals.toLocaleString();
+        kpiTotalRecruiters.textContent = totalRecruiters.toLocaleString();
+        kpiAvgReferrals.textContent = avgReferrals;
+        kpiTopRecruiterName.textContent = topRecruiter.name;
+        kpiTopRecruiterCode.textContent = topRecruiter.code;
+        kpiTopRecruiterCount.textContent = topRecruiter.referrals;
+    }
+
+    function renderRecruitmentCharts() {
+        const tooltipConfig = {
+            backgroundColor: 'rgba(255, 255, 255, 0.96)',
+            titleColor: '#d97706',
+            titleFont: { size: 13, weight: 'bold' },
+            bodyColor: '#0f172a',
+            borderColor: 'rgba(15, 23, 42, 0.08)',
+            borderWidth: 1,
+            padding: 12,
+            cornerRadius: 8
+        };
+
+        // 1. Monthly Trend Bar
+        const monthNames = ["Januari", "Februari", "Mac", "April", "Mei", "Jun", "Julai", "Ogos", "September", "Oktober", "November", "Disember"];
+        const monthlyMap = new Map();
+        for(let i = 1; i <= 12; i++) monthlyMap.set(String(i).padStart(2, '0'), 0);
+        
+        filteredRecruitmentData.forEach(row => {
+            const m = row.from.split('-')[1];
+            if (monthlyMap.has(m)) {
+                monthlyMap.set(m, monthlyMap.get(m) + row.referrals);
+            }
+        });
+
+        const ctxTrend = document.getElementById('chart-recruitment-trend').getContext('2d');
+        if (chartRecruitmentTrend) chartRecruitmentTrend.destroy();
+        chartRecruitmentTrend = new Chart(ctxTrend, {
+            type: 'bar',
+            data: {
+                labels: monthNames,
+                datasets: [{
+                    label: 'Bilangan Rujukan',
+                    data: Array.from(monthlyMap.values()),
+                    backgroundColor: 'rgba(143, 29, 56, 0.85)',
+                    borderColor: '#8F1D38',
+                    borderWidth: 1,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: tooltipConfig },
+                scales: { y: { grid: { color: 'rgba(15, 23, 42, 0.04)' } }, x: { grid: { display: false } } }
+            }
+        });
+
+        // 2. Leaderboard horizontal
+        const recMap = new Map();
+        filteredRecruitmentData.forEach(row => {
+            if (recMap.has(row.code)) {
+                recMap.get(row.code).referrals += row.referrals;
+            } else {
+                recMap.set(row.code, { code: row.code, name: row.name, referrals: row.referrals });
+            }
+        });
+        const sortedRecs = Array.from(recMap.values()).sort((a,b) => b.referrals - a.referrals);
+        const top10Recs = sortedRecs.slice(0, 10);
+
+        const ctxTop = document.getElementById('chart-recruitment-top-recruiters').getContext('2d');
+        if (chartRecruitmentTopRecruiters) chartRecruitmentTopRecruiters.destroy();
+        chartRecruitmentTopRecruiters = new Chart(ctxTop, {
+            type: 'bar',
+            data: {
+                labels: top10Recs.map(r => r.name.length > 15 ? r.name.substring(0, 15) + '..' : r.name),
+                datasets: [{
+                    label: 'Jumlah Rujukan',
+                    data: top10Recs.map(r => r.referrals),
+                    backgroundColor: 'rgba(184, 150, 13, 0.85)',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        ...tooltipConfig,
+                        callbacks: { title: (context) => top10Recs[context[0].dataIndex].name }
+                    }
+                },
+                scales: { x: { grid: { color: 'rgba(15, 23, 42, 0.04)' } }, y: { grid: { display: false } } }
+            }
+        });
+
+        // 3. Segment distribution doughnut
+        let casual = 0, medium = 0, pro = 0, superRec = 0;
+        recMap.forEach(rec => {
+            if (rec.referrals === 1) casual++;
+            else if (rec.referrals <= 5) medium++;
+            else if (rec.referrals <= 20) pro++;
+            else superRec++;
+        });
+
+        const ctxSeg = document.getElementById('chart-recruitment-segment-distribution').getContext('2d');
+        if (chartRecruitmentSegmentDistribution) chartRecruitmentSegmentDistribution.destroy();
+        chartRecruitmentSegmentDistribution = new Chart(ctxSeg, {
+            type: 'doughnut',
+            data: {
+                labels: ['Casual (1)', 'Sederhana (2-5)', 'Pro (6-20)', 'Super Perekrut (>20)'],
+                datasets: [{
+                    data: [casual, medium, pro, superRec],
+                    backgroundColor: ['#94a3b8', '#0284c7', '#7c3aed', '#B8960D'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: tooltipConfig,
+                    legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12 } }
+                },
+                cutout: '60%'
+            }
+        });
+    }
+
+    function renderRecruitmentTable() {
+        const query = tableRecruitmentSearch.value.toLowerCase().trim();
+        const monthVal = tableRecruitmentFilterMonth.value;
+
+        let tableData = filteredRecruitmentData.filter(row => {
+            const codeMatch = row.code.toLowerCase().includes(query);
+            const nameMatch = row.name.toLowerCase().includes(query);
+            let monthMatch = true;
+            if (monthVal !== 'all') {
+                const rowMonth = row.from.split('-')[1];
+                monthMatch = (rowMonth === monthVal);
+            }
+            return (codeMatch || nameMatch) && monthMatch;
+        });
+
+        tableData.sort((a, b) => {
+            let valA = a[currentRecruitmentSortColumn];
+            let valB = b[currentRecruitmentSortColumn];
+            
+            if (currentRecruitmentSortColumn === 'rank') {
+                valA = a.referrals; valB = b.referrals;
+            }
+            if (typeof valA === 'string') {
+                return currentRecruitmentSortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
+            }
+            return currentRecruitmentSortAscending ? valA - valB : valB - valA;
+        });
+
+        const totalRows = tableData.length;
+        const totalPages = Math.ceil(totalRows / recruitmentRowsPerPage) || 1;
+        if (currentRecruitmentPage > totalPages) currentRecruitmentPage = totalPages;
+
+        const start = (currentRecruitmentPage - 1) * recruitmentRowsPerPage;
+        const end = Math.min(start + recruitmentRowsPerPage, totalRows);
+        const paginated = tableData.slice(start, end);
+
+        tableRecruitmentBody.innerHTML = '';
+        if (paginated.length === 0) {
+            tableRecruitmentBody.innerHTML = `<tr><td colspan="5" class="text-center" style="padding: 30px; color: var(--text-muted);">Tiada data rekrutmen ditemui</td></tr>`;
+            paginationRecruitmentInfo.textContent = `Menunjukkan 0 hingga 0 daripada 0 entri`;
+            paginationRecruitmentControls.innerHTML = '';
+            return;
+        }
+
+        paginated.forEach((row, i) => {
+            const displayIndex = start + i + 1;
+            const dateStr = `${formatDisplayDate(row.from)} hingga ${formatDisplayDate(row.to)}`;
+            const isSuper = row.referrals >= 20;
+            const rowStyle = isSuper ? 'style="font-weight: 600; background-color: rgba(184, 150, 13, 0.03);"' : '';
+
+            tableRecruitmentBody.innerHTML += `
+                <tr ${rowStyle}>
+                    <td class="text-center">${displayIndex}</td>
+                    <td><code style="color: var(--crimson); font-weight: bold;">${row.code}</code></td>
+                    <td>${row.name}</td>
+                    <td class="text-center" style="font-size: 13px; color: var(--text-muted);">${dateStr}</td>
+                    <td class="text-center" style="font-weight: bold; color: ${isSuper ? 'var(--gold-dark)' : 'inherit'}">${row.referrals}</td>
+                </tr>
+            `;
+        });
+
+        paginationRecruitmentInfo.textContent = `Menunjukkan ${start + 1} hingga ${end} daripada ${totalRows} entri`;
+        renderRecruitmentPaginationButtons(totalPages);
+    }
+
+    function renderRecruitmentPaginationButtons(totalPages) {
+        paginationRecruitmentControls.innerHTML = '';
+        if (totalPages <= 1) return;
+
+        const prev = document.createElement('button');
+        prev.className = 'btn btn-outline btn-sm';
+        prev.innerHTML = '<i class="fa-solid fa-chevron-left"></i>';
+        prev.disabled = currentRecruitmentPage === 1;
+        prev.onclick = () => { currentRecruitmentPage--; renderRecruitmentTable(); };
+        paginationRecruitmentControls.appendChild(prev);
+
+        let start = Math.max(1, currentRecruitmentPage - 2);
+        let end = Math.min(totalPages, start + 4);
+        if (end - start < 4) start = Math.max(1, end - 4);
+
+        for (let i = start; i <= end; i++) {
+            const btn = document.createElement('button');
+            btn.className = `btn btn-sm ${i === currentRecruitmentPage ? 'btn-primary' : 'btn-outline'}`;
+            btn.textContent = i;
+            btn.onclick = () => { currentRecruitmentPage = i; renderRecruitmentTable(); };
+            paginationRecruitmentControls.appendChild(btn);
+        }
+
+        const next = document.createElement('button');
+        next.className = 'btn btn-outline btn-sm';
+        next.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
+        next.disabled = currentRecruitmentPage === totalPages;
+        next.onclick = () => { currentRecruitmentPage++; renderRecruitmentTable(); };
+        paginationRecruitmentControls.appendChild(next);
+    }
+
+    // --- Recruitment Sorter Headers ---
+    document.querySelectorAll('#recruitment-table th.sortable-rec').forEach(th => {
+        th.addEventListener('click', () => {
+            const col = th.getAttribute('data-sort');
+            if (currentRecruitmentSortColumn === col) {
+                currentRecruitmentSortAscending = !currentRecruitmentSortAscending;
+            } else {
+                currentRecruitmentSortColumn = col;
+                currentRecruitmentSortAscending = true;
+            }
+            document.querySelectorAll('#recruitment-table th.sortable-rec i').forEach(icon => icon.className = 'fa-solid fa-sort');
+            th.querySelector('i').className = currentRecruitmentSortAscending ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down';
+            renderRecruitmentTable();
         });
     });
 
-    // --- Autoload Data from Server ---
-    function autoloadData() {
-        fetch('data.json', { cache: 'no-store' }) // Avoid cached empty data
-            .then(res => {
-                if (res.ok) {
-                    return res.json();
-                }
-                throw new Error("Fail data.json tidak dijumpai.");
-            })
-            .then(data => {
-                if (Array.isArray(data) && data.length > 0) {
-                    combinedData = data;
-                    initializeDashboard();
-                    console.log("Data berjaya diautoload dari server.");
-                }
-            })
-            .catch(err => {
-                console.log("Tiada data autoload tersedia:", err.message);
-            });
+    // --- Recruitment Filters Event Listeners ---
+    filterRecruitmentStartDate.addEventListener('change', applyRecruitmentFilters);
+    filterRecruitmentEndDate.addEventListener('change', applyRecruitmentFilters);
+    filterRecruitmentMonth.addEventListener('change', (e) => { filterRecruitmentMonth.value = e.target.value; applyRecruitmentFilters(); });
+    tableRecruitmentFilterMonth.addEventListener('change', (e) => { filterRecruitmentMonth.value = e.target.value; applyRecruitmentFilters(); });
+    tableRecruitmentSearch.addEventListener('input', () => { currentRecruitmentPage = 1; renderRecruitmentTable(); });
+
+    // --- Recruitment Save/Load/Reset Server ---
+    btnRecruitmentSaveServer.addEventListener('click', () => saveRecruitmentDataToServer(true));
+
+    function saveRecruitmentDataToServer(showAlert) {
+        if (recruitmentData.length === 0) return;
+        btnRecruitmentSaveServer.setAttribute('disabled', 'true');
+        btnRecruitmentSaveServer.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+        
+        fetch('save_data.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'recruitment', key: 'gbgold2026', data: recruitmentData })
+        })
+        .then(response => response.json())
+        .then(res => {
+            btnRecruitmentSaveServer.removeAttribute('disabled');
+            btnRecruitmentSaveServer.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Simpan ke Server';
+            if (res.success) {
+                if (showAlert) alert('Berjaya menyimpan data rekrutmen ke server.');
+            } else {
+                alert('Ralat menyimpan: ' + res.message);
+            }
+        })
+        .catch(err => {
+            btnRecruitmentSaveServer.removeAttribute('disabled');
+            btnRecruitmentSaveServer.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Simpan ke Server';
+            alert('Ralat rangkaian: ' + err.message);
+        });
     }
 
-    // Run autoload on page load
-    autoloadData();
+    function loadRecruitmentDataFromServer() {
+        fetch('recruitment_data.json?v=' + Date.now())
+        .then(response => { if (!response.ok) throw new Error(); return response.json(); })
+        .then(data => {
+            if (Array.isArray(data) && data.length > 0) {
+                recruitmentData = data;
+                initRecruitmentDashboard();
+            }
+        })
+        .catch(() => initRecruitmentDashboard());
+    }
+
+    btnRecruitmentReset.addEventListener('click', () => {
+        if (confirm('Kosongkan semua data rekrutmen sedia ada? Halaman akan dimuat semula.')) {
+            fetch('save_data.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'recruitment', key: 'gbgold2026', data: [] })
+            }).then(() => { recruitmentData = []; location.reload(); });
+        }
+    });
+
+    // --- Recruitment Export CSV & Excel ---
+    btnRecruitmentExportCsv.addEventListener('click', () => {
+        if (filteredRecruitmentData.length === 0) return;
+        let csv = "No.,Kod Pelanggan,Nama Pelanggan,Tarikh Mula,Tarikh Tamat,Rujukan\n";
+        filteredRecruitmentData.forEach((row, i) => {
+            csv += `${i+1},${row.code},"${row.name.replace(/"/g, '""')}",${row.from},${row.to},${row.referrals}\n`;
+        });
+        triggerDownload(csv, 'csv', 'Laporan_Rekrutmen_GBGold');
+    });
+
+    btnRecruitmentExportXlsx.addEventListener('click', () => {
+        if (filteredRecruitmentData.length === 0) return;
+        const excelRows = filteredRecruitmentData.map((row, i) => ({
+            "No.": i + 1,
+            "Kod Pelanggan": row.code,
+            "Nama Pelanggan": row.name,
+            "Tarikh Mula": row.from,
+            "Tarikh Tamat": row.to,
+            "Jumlah Rujukan": row.referrals
+        }));
+        const ws = XLSX.utils.json_to_sheet(excelRows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Rekrutmen");
+        XLSX.writeFile(wb, `Laporan_Rekrutmen_GBGold_${new Date().toISOString().split('T')[0]}.xlsx`);
+    });
+
+    // --- Load Demo Recruitment Data ---
+    btnRecruitmentLoadDemo.addEventListener('click', () => {
+        const demoData = getDemoRecruitmentData();
+        recruitmentData = demoData;
+        initRecruitmentDashboard();
+        saveRecruitmentDataToServer(false);
+    });
+
+    // ==========================================
+    // --- 11. DEMO DATA GENERATION HELPERS ---
+    // ==========================================
+    // --- Sales Demo Data ---
+    btnLoadDemo.addEventListener('click', () => {
+        const demoGbs = [];
+        const demoRetail = [];
+        const year = "2026";
+        const months = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
+        
+        months.forEach(m => {
+            const daysInMonth = new Date(year, parseInt(m), 0).getDate();
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dayStr = String(d).padStart(2, '0');
+                const dateStr = `${year}-${m}-${dayStr}`;
+                
+                const seed = d + parseInt(m) * 10;
+                const rand1 = Math.sin(seed) * 10;
+                const rand2 = Math.cos(seed) * 8;
+                
+                const gbsTx = Math.floor(15 + Math.abs(rand1));
+                const gbsWt = 150 + Math.abs(rand1 * 50);
+                const gbsSales = gbsWt * (290 + rand2);
+                
+                const retTx = Math.floor(8 + Math.abs(rand2));
+                const retWt = 50 + Math.abs(rand2 * 15);
+                const retPrem = retTx * (45 + (seed % 10));
+                const retSales = retWt * (292 + rand1) + retPrem;
+                
+                demoGbs.push({ date: dateStr, transactions: gbsTx, weight: gbsWt, sales: gbsSales, ids: `CPO-${seed}` });
+                demoRetail.push({ date: dateStr, orders: retTx, weight: retWt, premium: retPrem, shipment: 15, sales: retSales, ids: `#${seed}` });
+            }
+        });
+        
+        gbsData = demoGbs;
+        retailData = demoRetail;
+        mergeSalesDatasets();
+        initSalesDashboard();
+        saveSalesDataToServer(false);
+    });
+
+    // --- Recruitment Demo Data (Matches Screenshot Exactly for June) ---
+    function getDemoRecruitmentData() {
+        const months = ["01", "02", "03", "04", "05", "06"];
+        const year = "2026";
+        const demoData = [];
+        const recruiters = [
+            { code: "GB00000001", name: "GB GOLD HQ" },
+            { code: "GB00000005", name: "SU RAIHAN MOHAMED" },
+            { code: "GB00000006", name: "NASRUL HANIS BIN ABD HALIM" },
+            { code: "GB00000011", name: "MUHAMMAD ALIF BIN MOHD SATAR" },
+            { code: "GB00000013", name: "NORAZLINA NAJMUDIN" },
+            { code: "GB00000015", name: "SAFRI BIN SOFYART" },
+            { code: "GB00000363", name: "SUHAIZAH BINTI ABDUL WAHAB" },
+            { code: "GB00000367", name: "HALIL BIN ISMAIL" },
+            { code: "GB00000400", name: "MUHAMMAD DANISH ARRAZIN BIN MOHD RAZIP" },
+            { code: "GB00000545", name: "SHUHAIRAZI BIN JANUDIN @ SHAMSUDIN" },
+            { code: "GB00000559", name: "MOHD NORFAHIZ BIN MOHD PATHAN" },
+            { code: "GB00000630", name: "AHMED AKMAL BIN ABDULL WAHID" },
+            { code: "GB00000770", name: "MUHAMMAD BADDRUN BIN MOHD SALLEH" },
+            { code: "GB00000778", name: "ASMA AMANI BINTI RAMON ZAHEDIN" },
+            { code: "GB00000779", name: "NORFADZRINA BINTI KAMARUDDIN" },
+            { code: "GB00000861", name: "ABDUL HAQIM BIN ABDUL RAHIM" },
+            { code: "GB00000889", name: "NURUL AIN BINTI ABD AZIZ" },
+            { code: "GB00001008", name: "HAWINA BINTI MORSHIDI" },
+            { code: "GB00001456", name: "ABD RAHIM BIN HAJI MAHMOOD" },
+            { code: "GB00001566", name: "KHATIJAH KAMARUDIN" },
+            { code: "GB00001716", name: "SYAHMILFARIS BIN JAAFAR" },
+            { code: "GB00001747", name: "ZURIANA BINTI MOHD JAMAL" },
+            { code: "GB00002274", name: "MOHAMAD SHAHREL BIN MOHD YUDIN" },
+            { code: "GB00002312", name: "MOHD AMIRON BIN ROSLI" },
+            { code: "GB00002346", name: "JOHARI BIN YAZID" },
+            { code: "GB00002391", name: "MOHD NORHAZIM BIN MOHD NORIN" },
+            { code: "GB00002419", name: "AHMAD FAUZAN BIN AHMAD ANUAR" },
+            { code: "GB00002622", name: "YAATI BINTI NOR" }
+        ];
+
+        const juneReferrals = {
+            "GB00000001": 5, "GB00000005": 3, "GB00000006": 20, "GB00000011": 3,
+            "GB00000013": 23, "GB00000015": 53, "GB00000363": 1, "GB00000367": 3,
+            "GB00000400": 1, "GB00000545": 18, "GB00000559": 1, "GB00000630": 1,
+            "GB00000770": 1, "GB00000778": 1, "GB00000779": 2, "GB00000861": 1,
+            "GB00000889": 5, "GB00001008": 1, "GB00001456": 2, "GB00001566": 1,
+            "GB00001716": 1, "GB00001747": 2, "GB00002274": 2, "GB00002312": 5,
+            "GB00002346": 1, "GB00002391": 1, "GB00002419": 1, "GB00002622": 45
+        };
+
+        months.forEach(m => {
+            const isJune = (m === "06");
+            const daysInMonth = new Date(year, parseInt(m), 0).getDate();
+            const fromDate = `${year}-${m}-01`;
+            const toDate = `${year}-${m}-${daysInMonth}`;
+
+            recruiters.forEach(rec => {
+                let referrals = 0;
+                if (isJune) {
+                    referrals = juneReferrals[rec.code] !== undefined ? juneReferrals[rec.code] : 0;
+                } else {
+                    const seed = parseInt(rec.code.replace("GB", "")) || 1;
+                    const rand = Math.sin(seed * parseInt(m)) * 10;
+                    if (rec.code === "GB00000015") referrals = Math.floor(25 + rand * 10);
+                    else if (rec.code === "GB00002622") referrals = Math.floor(20 + rand * 8);
+                    else if (rec.code === "GB00000013") referrals = Math.floor(15 + rand * 6);
+                    else if (rec.code === "GB00000006") referrals = Math.floor(10 + rand * 4);
+                    else if (rec.code === "GB00000545") referrals = Math.floor(8 + rand * 3);
+                    else referrals = Math.max(0, Math.floor((rand + 5) / 3));
+                }
+
+                if (referrals > 0) {
+                    demoData.push({
+                        code: rec.code,
+                        name: rec.name,
+                        from: fromDate,
+                        to: toDate,
+                        referrals: referrals
+                    });
+                }
+            });
+        });
+
+        return demoData;
+    }
+
+    function formatDisplayDate(dateStr) {
+        const parts = dateStr.split('-');
+        if (parts.length !== 3) return dateStr;
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
 });

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GBGold | Dashboard Analisis Jualan 2026</title>
+    <title>GBGold | Sistem Analisis Data Bersepadu 2026</title>
     <!-- Google Fonts: Cinzel (Heading) + Open Sans (Body) - GBGold Brand -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,364 +35,616 @@
                 </div>
             </div>
             <nav class="sidebar-menu">
-                <a href="index.html" class="menu-btn active"><i class="fa-solid fa-chart-line"></i> Analisis Jualan</a>
-                <a href="recruitment.html" class="menu-btn"><i class="fa-solid fa-users"></i> Analisis Rekrutmen</a>
+                <a href="#" id="btn-nav-sales" class="menu-btn active"><i class="fa-solid fa-chart-line"></i> Analisis Jualan</a>
+                <a href="#" id="btn-nav-recruitment" class="menu-btn"><i class="fa-solid fa-users"></i> Analisis Rekrutmen</a>
             </nav>
         </aside>
 
         <!-- Main Body Right -->
         <div class="main-body" style="flex-grow: 1; display: flex; flex-direction: column; gap: 24px; min-width: 0;">
-            <!-- Header -->
-            <header class="main-header" style="border-bottom: 3px solid var(--crimson);">
-                <div class="header-title">
-                    <h2 style="font-family: var(--font-heading); color: var(--text-dark); font-size: 20px;"><i class="fa-solid fa-chart-line gold-text"></i> Analisis Jualan 2026</h2>
-                    <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Urus dan analisa data jualan harian GBS & Retail</p>
-                </div>
-                <div class="header-actions">
-                    <button id="btn-load-demo" class="btn btn-secondary">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i> Muat Data Demo
-                    </button>
-                    <button id="btn-save-server" class="btn btn-primary" style="display: none;">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> Simpan ke Server
-                    </button>
-                    <button id="btn-reset" class="btn btn-danger" style="display: none;">
-                        <i class="fa-solid fa-trash-can"></i> Kosongkan Data
-                    </button>
-                </div>
-            </header>
+            
+            <!-- 1. SALES DASHBOARD VIEW CONTAINER -->
+            <div id="sales-dashboard-container">
+                <!-- Header -->
+                <header class="main-header" style="border-bottom: 3px solid var(--crimson);">
+                    <div class="header-title">
+                        <h2 style="font-family: var(--font-heading); color: var(--text-dark); font-size: 20px;"><i class="fa-solid fa-chart-line gold-text"></i> Analisis Jualan 2026</h2>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Urus dan analisa data jualan harian GBS & Retail</p>
+                    </div>
+                    <div class="header-actions">
+                        <button id="btn-load-demo" class="btn btn-secondary">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Muat Data Demo
+                        </button>
+                        <button id="btn-save-server" class="btn btn-primary" style="display: none;">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Simpan ke Server
+                        </button>
+                        <button id="btn-reset" class="btn btn-danger" style="display: none;">
+                            <i class="fa-solid fa-trash-can"></i> Kosongkan Data
+                        </button>
+                    </div>
+                </header>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- File Upload Section (Shown when no data is loaded) -->
-            <section id="upload-section" class="card upload-card">
-                <div class="card-header">
-                    <h2><i class="fa-solid fa-file-import gold-text"></i> Muat Naik Fail Data Jualan</h2>
-                    <p>Sila muat naik kedua-dua jenis fail data jualan untuk memulakan analisis jualan 2026.</p>
-                </div>
-                <div class="upload-grid">
-                    <!-- GBS Purchase Upload -->
-                    <div class="upload-box" id="drop-zone-gbs">
-                        <input type="file" id="file-gbs" accept=".xlsx, .xls, .csv" multiple hidden>
-                        <div class="upload-box-content">
-                            <div class="icon-container">
-                                <i class="fa-solid fa-file-invoice-dollar text-primary"></i>
+                <main class="main-content" style="display: flex; flex-direction: column; gap: 24px; margin-top: 24px;">
+                    <!-- File Upload Section -->
+                    <section id="upload-section" class="card upload-card">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-file-import gold-text"></i> Muat Naik Fail Data Jualan</h2>
+                            <p>Sila muat naik kedua-dua jenis fail data jualan untuk memulakan analisis jualan 2026.</p>
+                        </div>
+                        <div class="upload-grid">
+                            <!-- GBS Purchase Upload -->
+                            <div class="upload-box" id="drop-zone-gbs">
+                                <input type="file" id="file-gbs" accept=".xlsx, .xls, .csv" multiple hidden>
+                                <div class="upload-box-content">
+                                    <div class="icon-container">
+                                        <i class="fa-solid fa-file-invoice-dollar text-primary"></i>
+                                    </div>
+                                    <h3>1. GBS Purchase Data</h3>
+                                    <p class="description">GBS Daily Sales Report (CPO-xxx)</p>
+                                    <span class="file-info" id="gbs-file-info">Sila pilih atau tarik satu atau lebih fail ke sini</span>
+                                    <button type="button" class="btn btn-outline" onclick="document.getElementById('file-gbs').click()">
+                                        Pilih Fail
+                                    </button>
+                                </div>
                             </div>
-                            <h3>1. GBS Purchase Data</h3>
-                            <p class="description">GBS Daily Sales Report (CPO-xxx)</p>
-                            <span class="file-info" id="gbs-file-info">Sila pilih atau tarik satu atau lebih fail ke sini</span>
-                            <button type="button" class="btn btn-outline" onclick="document.getElementById('file-gbs').click()">
-                                Pilih Fail
-                            </button>
-                        </div>
-                    </div>
 
-                    <!-- Retail Sales Upload -->
-                    <div class="upload-box" id="drop-zone-retail">
-                        <input type="file" id="file-retail" accept=".xlsx, .xls, .csv" multiple hidden>
-                        <div class="upload-box-content">
-                            <div class="icon-container">
-                                <i class="fa-solid fa-store text-success"></i>
-                            </div>
-                            <h3>2. Daily Sales Data</h3>
-                            <p class="description">Retail Daily Sales Report (#xxx, Premium, Shipment)</p>
-                            <span class="file-info" id="retail-file-info">Sila pilih atau tarik satu atau lebih fail ke sini</span>
-                            <button type="button" class="btn btn-outline" onclick="document.getElementById('file-retail').click()">
-                                Pilih Fail
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="upload-actions">
-                    <button id="btn-process" class="btn btn-primary btn-lg" disabled>
-                        <i class="fa-solid fa-circle-play"></i> Proses & Gabung Data
-                    </button>
-                </div>
-            </section>
-
-            <!-- Dashboard Content Section (Hidden until data is loaded) -->
-            <div id="dashboard-view" style="display: none;">
-                <!-- Filter Toolbar -->
-                <section class="toolbar card">
-                    <div class="toolbar-title">
-                        <h3><i class="fa-solid fa-sliders text-gold"></i> Penapis Data 2026</h3>
-                    </div>
-                    <div class="toolbar-filters">
-                        <div class="filter-group">
-                            <label for="filter-start-date">Tarikh Mula:</label>
-                            <input type="date" id="filter-start-date" class="form-control">
-                        </div>
-                        <div class="filter-group">
-                            <label for="filter-end-date">Tarikh Tamat:</label>
-                            <input type="date" id="filter-end-date" class="form-control">
-                        </div>
-                        <div class="filter-group select-group">
-                            <label for="filter-month">Pilih Bulan:</label>
-                            <select id="filter-month" class="form-control">
-                                <option value="all">Semua Bulan (2026)</option>
-                                <option value="01">Januari</option>
-                                <option value="02">Februari</option>
-                                <option value="03">Mac</option>
-                                <option value="04">April</option>
-                                <option value="05">Mei</option>
-                                <option value="06">Jun</option>
-                                <option value="07">Julai</option>
-                                <option value="08">Ogos</option>
-                                <option value="09">September</option>
-                                <option value="10">Oktober</option>
-                                <option value="11">November</option>
-                                <option value="12">Disember</option>
-                            </select>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- KPI Cards Grid -->
-                <section class="kpi-grid">
-                    <!-- Total Combined Sales -->
-                    <div class="kpi-card card-glow">
-                        <div class="kpi-icon bg-gold-gradient">
-                            <i class="fa-solid fa-wallet"></i>
-                        </div>
-                        <div class="kpi-details">
-                            <span class="kpi-title">Jumlah Jualan Kasar (Combined)</span>
-                            <h2 id="kpi-total-sales" class="kpi-value">RM 0.00</h2>
-                            <div class="kpi-sub-grid">
-                                <div>GBS: <span id="kpi-sub-gbs-sales" class="sub-val">RM 0</span></div>
-                                <div>Retail: <span id="kpi-sub-retail-sales" class="sub-val">RM 0</span></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Total Gold Weight -->
-                    <div class="kpi-card">
-                        <div class="kpi-icon bg-blue-gradient">
-                            <i class="fa-solid fa-scale-balanced"></i>
-                        </div>
-                        <div class="kpi-details">
-                            <span class="kpi-title">Jumlah Berat Emas</span>
-                            <h2 id="kpi-total-weight" class="kpi-value">0.00 g</h2>
-                            <div class="kpi-sub-grid">
-                                <div>GBS: <span id="kpi-sub-gbs-weight" class="sub-val">0 g</span></div>
-                                <div>Retail: <span id="kpi-sub-retail-weight" class="sub-val">0 g</span></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Average Gold Price / gram -->
-                    <div class="kpi-card">
-                        <div class="kpi-icon bg-green-gradient">
-                            <i class="fa-solid fa-chart-line"></i>
-                        </div>
-                        <div class="kpi-details">
-                            <span class="kpi-title">Purata Jualan Se-gram</span>
-                            <h2 id="kpi-avg-price" class="kpi-value">RM 0.00/g</h2>
-                            <div class="kpi-sub-grid">
-                                <div>GBS: <span id="kpi-sub-gbs-price" class="sub-val">RM 0/g</span></div>
-                                <div>Retail: <span id="kpi-sub-retail-price" class="sub-val">RM 0/g</span></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Total Transactions / Orders -->
-                    <div class="kpi-card">
-                        <div class="kpi-icon bg-purple-gradient">
-                            <i class="fa-solid fa-receipt"></i>
-                        </div>
-                        <div class="kpi-details">
-                            <span class="kpi-title">Jumlah Transaksi & Pesanan</span>
-                            <h2 id="kpi-total-tx" class="kpi-value">0</h2>
-                            <div class="kpi-sub-grid">
-                                <div>GBS Tx: <span id="kpi-sub-gbs-tx" class="sub-val">0</span></div>
-                                <div>Retail Orders: <span id="kpi-sub-retail-tx" class="sub-val">0</span></div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Leaderboard Section -->
-                <section id="leaderboard-section" class="card">
-                    <div class="card-header">
-                        <h2><i class="fa-solid fa-trophy text-gold"></i> Kedudukan Prestasi Bulanan (Ranking 2026)</h2>
-                        <p>Kedudukan bulan terbaik berdasarkan prestasi jualan kasar (RM) dan berat emas yang dikeluarkan (g).</p>
-                    </div>
-                    <div class="leaderboard-grid">
-                        <!-- Sales Leaderboard -->
-                        <div class="leaderboard-col">
-                            <h3><i class="fa-solid fa-medal text-gold"></i> Kedudukan Jualan Kasar (RM)</h3>
-                            <div id="sales-leaderboard-list" class="leaderboard-list">
-                                <!-- Dynamically generated list -->
+                            <!-- Retail Sales Upload -->
+                            <div class="upload-box" id="drop-zone-retail">
+                                <input type="file" id="file-retail" accept=".xlsx, .xls, .csv" multiple hidden>
+                                <div class="upload-box-content">
+                                    <div class="icon-container">
+                                        <i class="fa-solid fa-store text-success"></i>
+                                    </div>
+                                    <h3>2. Daily Sales Data</h3>
+                                    <p class="description">Retail Daily Sales Report (#xxx, Premium, Shipment)</p>
+                                    <span class="file-info" id="retail-file-info">Sila pilih atau tarik satu atau lebih fail ke sini</span>
+                                    <button type="button" class="btn btn-outline" onclick="document.getElementById('file-retail').click()">
+                                        Pilih Fail
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         
-                        <!-- Weight Leaderboard -->
-                        <div class="leaderboard-col">
-                            <h3><i class="fa-solid fa-medal text-blue"></i> Kedudukan Berat Emas Dikeluarkan (g)</h3>
-                            <div id="weight-leaderboard-list" class="leaderboard-list">
-                                <!-- Dynamically generated list -->
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Charts Section -->
-                <section class="charts-grid">
-                    <!-- Chart 1: Sales Performance Trend -->
-                    <div class="card chart-card large-chart">
-                        <div class="card-header">
-                            <h3><i class="fa-solid fa-chart-area text-gold"></i> Trend Jualan Harian (RM)</h3>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="chart-sales-trend"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Chart 2: Gold Weight Comparison -->
-                    <div class="card chart-card">
-                        <div class="card-header">
-                            <h3><i class="fa-solid fa-weight-hanging text-blue"></i> Perbandingan Berat Emas Dikeluarkan (g)</h3>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="chart-weight-compare"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Chart 2B: Gold Weight Comparison Monthly -->
-                    <div class="card chart-card">
-                        <div class="card-header">
-                            <h3><i class="fa-solid fa-weight-hanging text-blue"></i> Perbandingan Berat Emas Dikeluarkan (g) Bulanan</h3>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="chart-weight-monthly"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Chart 3: Gold Price per Gram Trend -->
-                    <div class="card chart-card">
-                        <div class="card-header">
-                            <h3><i class="fa-solid fa-tags text-green"></i> Harga Emas Purata Se-Gram Harian (RM/g)</h3>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="chart-price-trend"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Chart 3B: Gold Price per Gram Monthly Trend -->
-                    <div class="card chart-card">
-                        <div class="card-header">
-                            <h3><i class="fa-solid fa-tags text-green"></i> Harga Emas Purata Se-Gram Bulanan (RM/g)</h3>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="chart-price-monthly"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Chart 4: Sales Contribution -->
-                    <div class="card chart-card small-chart">
-                        <div class="card-header">
-                            <h3><i class="fa-solid fa-chart-pie text-purple"></i> Sumbangan Saluran Jualan (%)</h3>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="chart-contribution"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Chart 5: Monthly Breakdown -->
-                    <div class="card chart-card double-chart">
-                        <div class="card-header">
-                            <h3><i class="fa-solid fa-calendar-days text-gold"></i> Rumusan Jualan Bulanan 2026 (RM)</h3>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="chart-monthly-sales"></canvas>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Combined Data Table Section -->
-                <section class="card table-card">
-                    <div class="table-header-row">
-                        <div class="table-title">
-                            <h2><i class="fa-solid fa-table text-gold"></i> Data Gabungan Harian (GBS & Retail)</h2>
-                            <p>Menunjukkan padanan data harian bagi tahun 2026</p>
-                        </div>
-                        <div class="table-actions">
-                            <select id="table-filter-month" class="form-control" style="height: 38px; padding-top: 6px; padding-bottom: 6px;">
-                                <option value="all">Semua Bulan</option>
-                                <option value="01">Januari</option>
-                                <option value="02">Februari</option>
-                                <option value="03">Mac</option>
-                                <option value="04">April</option>
-                                <option value="05">Mei</option>
-                                <option value="06">Jun</option>
-                                <option value="07">Julai</option>
-                                <option value="08">Ogos</option>
-                                <option value="09">September</option>
-                                <option value="10">Oktober</option>
-                                <option value="11">November</option>
-                                <option value="12">Disember</option>
-                            </select>
-                            <div class="search-box">
-                                <i class="fa-solid fa-magnifying-glass"></i>
-                                <input type="text" id="table-search" placeholder="Cari tarikh...">
-                            </div>
-                            <button id="btn-export-csv" class="btn btn-success-outline">
-                                <i class="fa-solid fa-file-csv"></i> Eksport CSV
-                            </button>
-                            <button id="btn-export-xlsx" class="btn btn-success">
-                                <i class="fa-solid fa-file-excel"></i> Eksport Excel
+                        <div class="upload-actions">
+                            <button id="btn-process" class="btn btn-primary btn-lg" disabled>
+                                <i class="fa-solid fa-circle-play"></i> Proses & Gabung Data
                             </button>
                         </div>
-                    </div>
+                    </section>
 
-                    <div class="table-responsive">
-                        <table class="data-table" id="combined-table">
-                            <thead>
-                                <tr>
-                                    <th rowspan="2" class="text-center sortable" data-sort="date">Tarikh <i class="fa-solid fa-sort"></i></th>
-                                    <th colspan="4" class="text-center gbs-header-cell">GBS Purchase (CPO)</th>
-                                    <th colspan="5" class="text-center retail-header-cell">Retail Daily Sales (#)</th>
-                                    <th colspan="3" class="text-center combined-header-cell">Jumlah Keseluruhan (Combined)</th>
-                                </tr>
-                                <tr>
-                                    <th class="sortable" data-sort="gbs_tx">Tx <i class="fa-solid fa-sort"></i></th>
-                                    <th class="sortable" data-sort="gbs_wt">Berat (g) <i class="fa-solid fa-sort"></i></th>
-                                    <th class="sortable" data-sort="gbs_sales">Jualan (RM) <i class="fa-solid fa-sort"></i></th>
-                                    <th>Purata (RM/g)</th>
-                                    
-                                    <th class="sortable" data-sort="ret_tx">Pesanan <i class="fa-solid fa-sort"></i></th>
-                                    <th class="sortable" data-sort="ret_wt">Berat (g) <i class="fa-solid fa-sort"></i></th>
-                                    <th class="sortable" data-sort="ret_prem">Premium (RM)</th>
-                                    <th class="sortable" data-sort="ret_sales">Jualan (RM) <i class="fa-solid fa-sort"></i></th>
-                                    <th>Purata (RM/g)</th>
-                                    
-                                    <th class="sortable" data-sort="total_wt">Berat (g) <i class="fa-solid fa-sort"></i></th>
-                                    <th class="sortable" data-sort="total_sales">Jualan (RM) <i class="fa-solid fa-sort"></i></th>
-                                    <th>Purata (RM/g)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-body">
-                                <!-- Data rows will be generated dynamically -->
-                            </tbody>
-                        </table>
-                    </div>
+                    <!-- Dashboard Content Section -->
+                    <div id="dashboard-view" style="display: none;">
+                        <!-- Filter Toolbar -->
+                        <section class="toolbar card" style="margin-bottom: 24px;">
+                            <div class="toolbar-title">
+                                <h3><i class="fa-solid fa-sliders text-gold"></i> Penapis Data 2026</h3>
+                            </div>
+                            <div class="toolbar-filters">
+                                <div class="filter-group">
+                                    <label for="filter-start-date">Tarikh Mula:</label>
+                                    <input type="date" id="filter-start-date" class="form-control">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="filter-end-date">Tarikh Tamat:</label>
+                                    <input type="date" id="filter-end-date" class="form-control">
+                                </div>
+                                <div class="filter-group select-group">
+                                    <label for="filter-month">Pilih Bulan:</label>
+                                    <select id="filter-month" class="form-control">
+                                        <option value="all">Semua Bulan (2026)</option>
+                                        <option value="01">Januari</option>
+                                        <option value="02">Februari</option>
+                                        <option value="03">Mac</option>
+                                        <option value="04">April</option>
+                                        <option value="05">Mei</option>
+                                        <option value="06">Jun</option>
+                                        <option value="07">Julai</option>
+                                        <option value="08">Ogos</option>
+                                        <option value="09">September</option>
+                                        <option value="10">Oktober</option>
+                                        <option value="11">November</option>
+                                        <option value="12">Disember</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </section>
 
-                    <!-- Pagination -->
-                    <div class="table-footer">
-                        <div class="pagination-info" id="pagination-info">
-                            Menunjukkan 0 hingga 0 daripada 0 entri
-                        </div>
-                        <div class="pagination-controls" id="pagination-controls">
-                            <!-- Pagination buttons will be generated dynamically -->
-                        </div>
+                        <!-- KPI Cards Grid -->
+                        <section class="kpi-grid" style="margin-bottom: 24px;">
+                            <!-- Total Combined Sales -->
+                            <div class="kpi-card card-glow">
+                                <div class="kpi-icon bg-gold-gradient">
+                                    <i class="fa-solid fa-wallet"></i>
+                                </div>
+                                <div class="kpi-details">
+                                    <span class="kpi-title">Jumlah Jualan Kasar (Combined)</span>
+                                    <h2 id="kpi-total-sales" class="kpi-value">RM 0.00</h2>
+                                    <div class="kpi-sub-grid">
+                                        <div>GBS: <span id="kpi-sub-gbs-sales" class="sub-val">RM 0</span></div>
+                                        <div>Retail: <span id="kpi-sub-retail-sales" class="sub-val">RM 0</span></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Total Gold Weight -->
+                            <div class="kpi-card">
+                                <div class="kpi-icon bg-blue-gradient">
+                                    <i class="fa-solid fa-scale-balanced"></i>
+                                </div>
+                                <div class="kpi-details">
+                                    <span class="kpi-title">Jumlah Berat Emas</span>
+                                    <h2 id="kpi-total-weight" class="kpi-value">0.00 g</h2>
+                                    <div class="kpi-sub-grid">
+                                        <div>GBS: <span id="kpi-sub-gbs-weight" class="sub-val">0 g</span></div>
+                                        <div>Retail: <span id="kpi-sub-retail-weight" class="sub-val">0 g</span></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Average Gold Price / gram -->
+                            <div class="kpi-card">
+                                <div class="kpi-icon bg-green-gradient">
+                                    <i class="fa-solid fa-chart-line"></i>
+                                </div>
+                                <div class="kpi-details">
+                                    <span class="kpi-title">Purata Jualan Se-gram</span>
+                                    <h2 id="kpi-avg-price" class="kpi-value">RM 0.00/g</h2>
+                                    <div class="kpi-sub-grid">
+                                        <div>GBS: <span id="kpi-sub-gbs-price" class="sub-val">RM 0/g</span></div>
+                                        <div>Retail: <span id="kpi-sub-retail-price" class="sub-val">RM 0/g</span></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Total Transactions / Orders -->
+                            <div class="kpi-card">
+                                <div class="kpi-icon bg-purple-gradient">
+                                    <i class="fa-solid fa-receipt"></i>
+                                </div>
+                                <div class="kpi-details">
+                                    <span class="kpi-title">Jumlah Transaksi & Pesanan</span>
+                                    <h2 id="kpi-total-tx" class="kpi-value">0</h2>
+                                    <div class="kpi-sub-grid">
+                                        <div>GBS Tx: <span id="kpi-sub-gbs-tx" class="sub-val">0</span></div>
+                                        <div>Retail Orders: <span id="kpi-sub-retail-tx" class="sub-val">0</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Leaderboard Section -->
+                        <section id="leaderboard-section" class="card" style="margin-bottom: 24px;">
+                            <div class="card-header">
+                                <h2><i class="fa-solid fa-trophy text-gold"></i> Kedudukan Prestasi Bulanan (Ranking 2026)</h2>
+                                <p>Kedudukan bulan terbaik berdasarkan prestasi jualan kasar (RM) dan berat emas yang dikeluarkan (g).</p>
+                            </div>
+                            <div class="leaderboard-grid">
+                                <!-- Sales Leaderboard -->
+                                <div class="leaderboard-col">
+                                    <h3><i class="fa-solid fa-medal text-gold"></i> Kedudukan Jualan Kasar (RM)</h3>
+                                    <div id="sales-leaderboard-list" class="leaderboard-list">
+                                        <!-- Dynamically generated list -->
+                                    </div>
+                                </div>
+                                
+                                <!-- Weight Leaderboard -->
+                                <div class="leaderboard-col">
+                                    <h3><i class="fa-solid fa-medal text-blue"></i> Kedudukan Berat Emas Dikeluarkan (g)</h3>
+                                    <div id="weight-leaderboard-list" class="leaderboard-list">
+                                        <!-- Dynamically generated list -->
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Charts Section -->
+                        <section class="charts-grid" style="margin-bottom: 24px;">
+                            <!-- Chart 1: Sales Performance Trend -->
+                            <div class="card chart-card large-chart">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-chart-area text-gold"></i> Trend Jualan Harian (RM)</h3>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="chart-sales-trend"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Chart 2: Gold Weight Comparison -->
+                            <div class="card chart-card">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-weight-hanging text-blue"></i> Perbandingan Berat Emas Dikeluarkan (g)</h3>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="chart-weight-compare"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Chart 2B: Gold Weight Comparison Monthly -->
+                            <div class="card chart-card">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-weight-hanging text-blue"></i> Perbandingan Berat Emas Dikeluarkan (g) Bulanan</h3>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="chart-weight-monthly"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Chart 3: Gold Price per Gram Trend -->
+                            <div class="card chart-card">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-tags text-green"></i> Harga Emas Purata Se-Gram Harian (RM/g)</h3>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="chart-price-trend"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Chart 3B: Gold Price per Gram Monthly Trend -->
+                            <div class="card chart-card">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-tags text-green"></i> Harga Emas Purata Se-Gram Bulanan (RM/g)</h3>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="chart-price-monthly"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Chart 4: Sales Contribution -->
+                            <div class="card chart-card small-chart">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-chart-pie text-purple"></i> Sumbangan Saluran Jualan (%)</h3>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="chart-contribution"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Chart 5: Monthly Breakdown -->
+                            <div class="card chart-card double-chart">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-calendar-days text-gold"></i> Rumusan Jualan Bulanan 2026 (RM)</h3>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="chart-monthly-sales"></canvas>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Combined Data Table Section -->
+                        <section class="card table-card">
+                            <div class="table-header-row">
+                                <div class="table-title">
+                                    <h2><i class="fa-solid fa-table text-gold"></i> Data Gabungan Harian (GBS & Retail)</h2>
+                                    <p>Menunjukkan padanan data harian bagi tahun 2026</p>
+                                </div>
+                                <div class="table-actions">
+                                    <select id="table-filter-month" class="form-control" style="height: 38px; padding-top: 6px; padding-bottom: 6px;">
+                                        <option value="all">Semua Bulan</option>
+                                        <option value="01">Januari</option>
+                                        <option value="02">Februari</option>
+                                        <option value="03">Mac</option>
+                                        <option value="04">April</option>
+                                        <option value="05">Mei</option>
+                                        <option value="06">Jun</option>
+                                        <option value="07">Julai</option>
+                                        <option value="08">Ogos</option>
+                                        <option value="09">September</option>
+                                        <option value="10">Oktober</option>
+                                        <option value="11">November</option>
+                                        <option value="12">Disember</option>
+                                    </select>
+                                    <div class="search-box">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                        <input type="text" id="table-search" placeholder="Cari tarikh...">
+                                    </div>
+                                    <button id="btn-export-csv" class="btn btn-success-outline">
+                                        <i class="fa-solid fa-file-csv"></i> Eksport CSV
+                                    </button>
+                                    <button id="btn-export-xlsx" class="btn btn-success">
+                                        <i class="fa-solid fa-file-excel"></i> Eksport Excel
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="data-table" id="combined-table">
+                                    <thead>
+                                        <tr>
+                                            <th rowspan="2" class="text-center sortable" data-sort="date">Tarikh <i class="fa-solid fa-sort"></i></th>
+                                            <th colspan="4" class="text-center gbs-header-cell">GBS Purchase (CPO)</th>
+                                            <th colspan="5" class="text-center retail-header-cell">Retail Daily Sales (#)</th>
+                                            <th colspan="3" class="text-center combined-header-cell">Jumlah Keseluruhan (Combined)</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="sortable" data-sort="gbs_tx">Tx <i class="fa-solid fa-sort"></i></th>
+                                            <th class="sortable" data-sort="gbs_wt">Berat (g) <i class="fa-solid fa-sort"></i></th>
+                                            <th class="sortable" data-sort="gbs_sales">Jualan (RM) <i class="fa-solid fa-sort"></i></th>
+                                            <th>Purata (RM/g)</th>
+                                            
+                                            <th class="sortable" data-sort="ret_tx">Pesanan <i class="fa-solid fa-sort"></i></th>
+                                            <th class="sortable" data-sort="ret_wt">Berat (g) <i class="fa-solid fa-sort"></i></th>
+                                            <th class="sortable" data-sort="ret_prem">Premium (RM)</th>
+                                            <th class="sortable" data-sort="ret_sales">Jualan (RM) <i class="fa-solid fa-sort"></i></th>
+                                            <th>Purata (RM/g)</th>
+                                            
+                                            <th class="sortable" data-sort="total_wt">Berat (g) <i class="fa-solid fa-sort"></i></th>
+                                            <th class="sortable" data-sort="total_sales">Jualan (RM) <i class="fa-solid fa-sort"></i></th>
+                                            <th>Purata (RM/g)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-body">
+                                        <!-- Data rows will be generated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Pagination -->
+                            <div class="table-footer">
+                                <div class="pagination-info" id="pagination-info">
+                                    Menunjukkan 0 hingga 0 daripada 0 entri
+                                </div>
+                                <div class="pagination-controls" id="pagination-controls">
+                                    <!-- Pagination buttons will be generated dynamically -->
+                                </div>
+                            </div>
+                        </section>
                     </div>
-                </section>
+                </main>
             </div>
-        </main>
 
-        <!-- Footer -->
-        <footer class="main-footer-text">
-            <p>&copy; 2026 GBGold Sales Analysis Dashboard. Direka untuk prestasi tinggi dan keputusan pintar.</p>
-        </footer>
+            <!-- 2. RECRUITMENT DASHBOARD VIEW CONTAINER -->
+            <div id="recruitment-dashboard-container" style="display: none;">
+                <!-- Header -->
+                <header class="main-header" style="border-bottom: 3px solid var(--crimson);">
+                    <div class="header-title">
+                        <h2 style="font-family: var(--font-heading); color: var(--text-dark); font-size: 20px;"><i class="fa-solid fa-users gold-text"></i> Analisis Rekrutmen 2026</h2>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Urus dan analisa prestasi kemasukan ahli baru (Referrals)</p>
+                    </div>
+                    <div class="header-actions">
+                        <button id="btn-recruitment-load-demo" class="btn btn-secondary">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Muat Data Demo
+                        </button>
+                        <button id="btn-recruitment-save-server" class="btn btn-primary" style="display: none;">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Simpan ke Server
+                        </button>
+                        <button id="btn-recruitment-reset" class="btn btn-danger" style="display: none;">
+                            <i class="fa-solid fa-trash-can"></i> Kosongkan Data
+                        </button>
+                    </div>
+                </header>
+
+                <main class="main-content" style="display: flex; flex-direction: column; gap: 24px; margin-top: 24px;">
+                    <!-- File Upload Section -->
+                    <section id="recruitment-upload-section" class="card upload-card">
+                        <div class="card-header">
+                            <h2><i class="fa-solid fa-file-import gold-text"></i> Muat Naik Fail Data Rekrutmen</h2>
+                            <p>Sila muat naik laporan Customer Referrals bulanan untuk memulakan analisis rekrutmen 2026.</p>
+                        </div>
+                        <div class="upload-grid" style="grid-template-columns: 1fr;">
+                            <!-- Recruitment Upload Box -->
+                            <div class="upload-box" id="drop-zone-recruitment" style="padding: 40px 20px;">
+                                <input type="file" id="file-recruitment" accept=".xlsx, .xls, .csv" multiple hidden>
+                                <div class="upload-box-content">
+                                    <div class="icon-container" style="background: var(--gold-light); color: var(--gold);">
+                                        <i class="fa-solid fa-users-gear text-gold"></i>
+                                    </div>
+                                    <h3>Customer Referrals Report</h3>
+                                    <p class="description">Pilih fail laporan referal bulanan (format Excel atau CSV)</p>
+                                    <span class="file-info" id="recruitment-file-info">Sila pilih atau tarik satu atau lebih fail ke sini</span>
+                                    <button type="button" class="btn btn-outline" onclick="document.getElementById('file-recruitment').click()">
+                                        Pilih Fail
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="upload-actions">
+                            <button id="btn-recruitment-process" class="btn btn-primary btn-lg" disabled>
+                                <i class="fa-solid fa-circle-play"></i> Proses & Analisis Data
+                            </button>
+                        </div>
+                    </section>
+
+                    <!-- Dashboard Content Section -->
+                    <div id="recruitment-dashboard-view" style="display: none;">
+                        <!-- Filter Toolbar -->
+                        <section class="toolbar card" style="margin-bottom: 24px;">
+                            <div class="toolbar-title">
+                                <h3><i class="fa-solid fa-sliders text-gold"></i> Penapis Data Rekrutmen</h3>
+                            </div>
+                            <div class="toolbar-filters">
+                                <div class="filter-group">
+                                    <label for="filter-recruitment-start-date">Tarikh Mula:</label>
+                                    <input type="date" id="filter-recruitment-start-date" class="form-control">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="filter-recruitment-end-date">Tarikh Tamat:</label>
+                                    <input type="date" id="filter-recruitment-end-date" class="form-control">
+                                </div>
+                                <div class="filter-group select-group">
+                                    <label for="filter-recruitment-month">Pilih Bulan:</label>
+                                    <select id="filter-recruitment-month" class="form-control">
+                                        <option value="all">Semua Bulan (2026)</option>
+                                        <option value="01">Januari</option>
+                                        <option value="02">Februari</option>
+                                        <option value="03">Mac</option>
+                                        <option value="04">April</option>
+                                        <option value="05">Mei</option>
+                                        <option value="06">Jun</option>
+                                        <option value="07">Julai</option>
+                                        <option value="08">Ogos</option>
+                                        <option value="09">September</option>
+                                        <option value="10">Oktober</option>
+                                        <option value="11">November</option>
+                                        <option value="12">Disember</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- KPI Cards Grid -->
+                        <section class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-bottom: 24px;">
+                            <!-- Total Referrals -->
+                            <div class="kpi-card card-glow">
+                                <div class="kpi-icon bg-gold-gradient">
+                                    <i class="fa-solid fa-user-plus"></i>
+                                </div>
+                                <div class="kpi-details">
+                                    <span class="kpi-title">Jumlah Rujukan (Referrals)</span>
+                                    <h2 id="kpi-total-referrals" class="kpi-value">0</h2>
+                                    <div class="kpi-sub-text" style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                                        Ahli baru berdaftar
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Total Unique Recruiters -->
+                            <div class="kpi-card">
+                                <div class="kpi-icon bg-blue-gradient">
+                                    <i class="fa-solid fa-users"></i>
+                                </div>
+                                <div class="kpi-details">
+                                    <span class="kpi-title">Jumlah Perekrut Aktif</span>
+                                    <h2 id="kpi-total-recruiters" class="kpi-value">0</h2>
+                                    <div class="kpi-sub-text" style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                                        Kod pelanggan unik membawa referral
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Average Referrals per Recruiter -->
+                            <div class="kpi-card">
+                                <div class="kpi-icon bg-green-gradient">
+                                    <i class="fa-solid fa-calculator"></i>
+                                </div>
+                                <div class="kpi-details">
+                                    <span class="kpi-title">Purata Rujukan Perekrut</span>
+                                    <h2 id="kpi-recruitment-avg-referrals" class="kpi-value">0.0</h2>
+                                    <div class="kpi-sub-text" style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                                        Rujukan bagi setiap perekrut
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Top Recruiter of the Period -->
+                            <div class="kpi-card">
+                                <div class="kpi-icon bg-purple-gradient">
+                                    <i class="fa-solid fa-trophy"></i>
+                                </div>
+                                <div class="kpi-details">
+                                    <span class="kpi-title">Perekrut Terbaik (Top Recruiter)</span>
+                                    <h2 id="kpi-recruitment-top-recruiter-name" class="kpi-value" style="font-size: 18px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 250px;">Tiada</h2>
+                                    <div class="kpi-sub-text" style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                                        <span id="kpi-recruitment-top-recruiter-code">-</span> (<span id="kpi-recruitment-top-recruiter-count">0</span> rujukan)
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Charts Section -->
+                        <section class="charts-grid" style="grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); margin-bottom: 24px;">
+                            <!-- Chart 1: Monthly Recruitment Trend -->
+                            <div class="card chart-card large-chart" style="grid-column: span 2;">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-chart-line text-gold"></i> Trend Pendaftaran Rujukan Bulanan (2026)</h3>
+                                </div>
+                                <div class="chart-container" style="height: 320px; position: relative;">
+                                    <canvas id="chart-recruitment-trend"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Chart 2: Top 10 Recruiters Leaderboard -->
+                            <div class="card chart-card">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-medal text-gold"></i> 10 Perekrut Terbaik (Leaderboard)</h3>
+                                </div>
+                                <div class="chart-container" style="height: 300px; position: relative;">
+                                    <canvas id="chart-recruitment-top-recruiters"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Chart 3: Recruiter Distribution Segment -->
+                            <div class="card chart-card">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-chart-pie text-purple"></i> Profiling Agihan Kumpulan Perekrut</h3>
+                                </div>
+                                <div class="chart-container" style="height: 300px; position: relative;">
+                                    <canvas id="chart-recruitment-segment-distribution"></canvas>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Interactive Data Table Section -->
+                        <section class="card table-card">
+                            <div class="table-header-row">
+                                <div class="table-title">
+                                    <h2><i class="fa-solid fa-table text-gold"></i> Rekod Rujukan Perekrut</h2>
+                                    <p>Senarai pelanggan yang berdaftar sebagai perekrut dan bilangan rujukan mereka</p>
+                                </div>
+                                <div class="table-actions">
+                                    <select id="table-recruitment-filter-month" class="form-control" style="height: 38px; padding-top: 6px; padding-bottom: 6px;">
+                                        <option value="all">Semua Bulan</option>
+                                        <option value="01">Januari</option>
+                                        <option value="02">Februari</option>
+                                        <option value="03">Mac</option>
+                                        <option value="04">April</option>
+                                        <option value="05">Mei</option>
+                                        <option value="06">Jun</option>
+                                        <option value="07">Julai</option>
+                                        <option value="08">Ogos</option>
+                                        <option value="09">September</option>
+                                        <option value="10">Oktober</option>
+                                        <option value="11">November</option>
+                                        <option value="12">Disember</option>
+                                    </select>
+                                    <div class="search-box">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                        <input type="text" id="table-recruitment-search" placeholder="Cari nama / kod pelanggan...">
+                                    </div>
+                                    <button id="btn-recruitment-export-csv" class="btn btn-success-outline">
+                                        <i class="fa-solid fa-file-csv"></i> Eksport CSV
+                                    </button>
+                                    <button id="btn-recruitment-export-xlsx" class="btn btn-success">
+                                        <i class="fa-solid fa-file-excel"></i> Eksport Excel
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="data-table" id="recruitment-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center sortable-rec" data-sort="rank" style="width: 80px;">No. <i class="fa-solid fa-sort"></i></th>
+                                            <th class="sortable-rec" data-sort="code">Kod Pelanggan <i class="fa-solid fa-sort"></i></th>
+                                            <th class="sortable-rec" data-sort="name">Nama Pelanggan <i class="fa-solid fa-sort"></i></th>
+                                            <th class="text-center">Tempoh Tarikh Laporan (Bulanan)</th>
+                                            <th class="text-center sortable-rec" data-sort="referrals" style="width: 150px;">Bil. Rujukan <i class="fa-solid fa-sort"></i></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-recruitment-body">
+                                        <!-- Data rows will be generated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Pagination -->
+                            <div class="table-footer">
+                                <div class="pagination-info" id="pagination-recruitment-info">
+                                    Menunjukkan 0 hingga 0 daripada 0 entri
+                                </div>
+                                <div class="pagination-controls" id="pagination-recruitment-controls">
+                                    <!-- Pagination buttons will be generated dynamically -->
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </main>
+            </div>
+
+            <!-- Footer -->
+            <footer class="main-footer-text">
+                <p>&copy; 2026 GBGold Analysis Dashboard System. Direka untuk prestasi tinggi dan keputusan pintar.</p>
+            </footer>
         </div> <!-- End of .main-body -->
     </div> <!-- End of .app-container -->
     
