@@ -411,17 +411,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Recruitment Data Cleaners ---
     function cleanRecruitmentData(data) {
         return data.map(row => {
-            const codeKey = findKey(row, 'customercode') || findKey(row, 'code');
-            const nameKey = findKey(row, 'customername') || findKey(row, 'name');
-            const fromKey = findKey(row, 'from');
-            const toKey = findKey(row, 'to');
-            const referralsKey = findKey(row, 'referrals') || findKey(row, 'referral');
+            const codeKey = findKey(row, 'customercode') || findKey(row, 'code') || findKey(row, 'kod') || findKey(row, 'noahli') || findKey(row, 'username');
+            const nameKey = findKey(row, 'customername') || findKey(row, 'name') || findKey(row, 'nama');
+            const fromKey = findKey(row, 'from') || findKey(row, 'dari') || findKey(row, 'mula') || findKey(row, 'start');
+            const toKey = findKey(row, 'to') || findKey(row, 'hingga') || findKey(row, 'tamat') || findKey(row, 'end');
+            const referralsKey = findKey(row, 'referrals') || findKey(row, 'referral') || findKey(row, 'rujukan');
 
             const rawCode = String(row[codeKey] || "").trim();
             const rawName = String(row[nameKey] || "").trim();
             const referralsCount = parseInt(cleanNumString(row[referralsKey])) || 0;
 
-            if (!rawCode || !rawCode.startsWith('GB')) return null;
+            if (!rawCode || !rawCode.toUpperCase().startsWith('GB')) return null;
 
             const parsedFrom = parseDate(row[fromKey]);
             const parsedTo = parseDate(row[toKey]);
@@ -429,7 +429,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!parsedFrom || !parsedTo) return null;
 
             return {
-                code: rawCode,
+                code: rawCode.toUpperCase(),
                 name: rawName,
                 from: parsedFrom,
                 to: parsedTo,
@@ -440,7 +440,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function findKey(row, term) {
         const keys = Object.keys(row);
-        const match = keys.find(k => k.toLowerCase().replace(/[\s_.-]+/g, '').includes(term.toLowerCase()));
+        const termLower = term.toLowerCase();
+        
+        // 1. Exact match (cleaned)
+        let match = keys.find(k => {
+            const cleanKey = k.toLowerCase().replace(/[\s_.-]+/g, '');
+            return cleanKey === termLower;
+        });
+        if (match) return match;
+        
+        // 2. Whole word or word prefix match
+        match = keys.find(k => {
+            const words = k.toLowerCase().split(/[^a-z0-9]+/);
+            return words.some(w => w === termLower || w.startsWith(termLower));
+        });
+        if (match) return match;
+        
+        // 3. Fallback: substring match (only if term is at least 3 characters)
+        if (termLower.length > 2) {
+            match = keys.find(k => {
+                const cleanKey = k.toLowerCase().replace(/[\s_.-]+/g, '');
+                return cleanKey.includes(termLower);
+            });
+        }
+        
         return match || null;
     }
 
