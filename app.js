@@ -1563,16 +1563,35 @@ document.addEventListener('DOMContentLoaded', () => {
         const query = tableRecruitmentSearch.value.toLowerCase().trim();
         const monthVal = tableRecruitmentFilterMonth.value;
 
-        let tableData = filteredRecruitmentData.filter(row => {
-            const codeMatch = row.code.toLowerCase().includes(query);
-            const nameMatch = row.name.toLowerCase().includes(query);
-            let monthMatch = true;
-            if (monthVal !== 'all') {
+        let tableData;
+
+        if (monthVal === 'all') {
+            // Aggregate: group by customer code, sum referrals, show date range
+            const aggMap = new Map();
+            filteredRecruitmentData.forEach(row => {
+                const codeMatch = row.code.toLowerCase().includes(query);
+                const nameMatch = row.name.toLowerCase().includes(query);
+                if (!codeMatch && !nameMatch) return;
+
+                if (aggMap.has(row.code)) {
+                    const agg = aggMap.get(row.code);
+                    agg.referrals += row.referrals;
+                    if (row.from < agg.from) agg.from = row.from;
+                    if (row.to > agg.to) agg.to = row.to;
+                } else {
+                    aggMap.set(row.code, { code: row.code, name: row.name, referrals: row.referrals, from: row.from, to: row.to });
+                }
+            });
+            tableData = Array.from(aggMap.values());
+        } else {
+            // Show individual monthly records
+            tableData = filteredRecruitmentData.filter(row => {
+                const codeMatch = row.code.toLowerCase().includes(query);
+                const nameMatch = row.name.toLowerCase().includes(query);
                 const rowMonth = row.from.split('-')[1];
-                monthMatch = (rowMonth === monthVal);
-            }
-            return (codeMatch || nameMatch) && monthMatch;
-        });
+                return (codeMatch || nameMatch) && (rowMonth === monthVal);
+            });
+        }
 
         tableData.sort((a, b) => {
             let valA = a[currentRecruitmentSortColumn];
