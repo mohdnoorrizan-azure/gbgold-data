@@ -1427,35 +1427,18 @@ document.addEventListener('DOMContentLoaded', () => {
         for(let i = 1; i <= 12; i++) monthlyMap.set(String(i).padStart(2, '0'), 0);
         
         filteredRecruitmentData.forEach(row => {
-            const fromParts = row.from.split('-');
-            const toParts = row.to.split('-');
-            const fromYear = parseInt(fromParts[0]);
-            const fromMonth = parseInt(fromParts[1]);
-            const toYear = parseInt(toParts[0]);
-            const toMonth = parseInt(toParts[1]);
+            const fromMonth = row.from.split('-')[1];
+            const fromYear  = row.from.split('-')[0];
+            const toMonth   = row.to.split('-')[1];
+            const toYear    = row.to.split('-')[0];
 
-            // Collect all months in the from-to range
-            const monthsInRange = [];
-            for (let y = fromYear; y <= toYear; y++) {
-                const startM = (y === fromYear) ? fromMonth : 1;
-                const endM = (y === toYear) ? toMonth : 12;
-                for (let m = startM; m <= endM; m++) {
-                    const mStr = String(m).padStart(2, '0');
-                    if (monthlyMap.has(mStr)) monthsInRange.push(mStr);
-                }
+            // Same month → use that month; multi-month range → use the 'to' month
+            const m = (fromMonth === toMonth && fromYear === toYear) ? fromMonth : toMonth;
+
+            if (monthlyMap.has(m)) {
+                monthlyMap.set(m, monthlyMap.get(m) + row.referrals);
             }
-
-            if (monthsInRange.length === 0) return;
-
-            // Distribute referrals evenly across all months in range
-            const refPerMonth = row.referrals / monthsInRange.length;
-            monthsInRange.forEach(m => {
-                monthlyMap.set(m, monthlyMap.get(m) + refPerMonth);
-            });
         });
-
-        // Round values for clean display
-        monthlyMap.forEach((v, k) => monthlyMap.set(k, Math.round(v)));
 
         const ctxTrend = document.getElementById('chart-recruitment-trend').getContext('2d');
         if (chartRecruitmentTrend) chartRecruitmentTrend.destroy();
