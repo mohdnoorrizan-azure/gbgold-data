@@ -580,6 +580,30 @@
                             </div>
                         </section>
 
+                        <!-- Chart 4: Individual Recruiter Monthly Performance -->
+                        <section class="card chart-card" style="margin-bottom: 24px;">
+                            <div class="card-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                                <h3><i class="fa-solid fa-user-chart text-gold"></i> Prestasi Bulanan Perekrut</h3>
+                                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                    <div style="position: relative;">
+                                        <input type="text" id="recruiter-search-input" placeholder="Cari nama / kod perekrut..." class="form-control" style="width: 280px; height: 38px; padding-left: 34px;">
+                                        <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 13px;"></i>
+                                        <div id="recruiter-search-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; max-height: 240px; overflow-y: auto; background: #fff; border: 1px solid rgba(15,23,42,0.1); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 100; margin-top: 4px;"></div>
+                                    </div>
+                                    <span id="recruiter-selected-label" style="font-size: 13px; color: var(--text-muted);">Sila pilih perekrut</span>
+                                </div>
+                            </div>
+                            <div class="chart-container" style="height: 320px; position: relative;">
+                                <canvas id="chart-recruiter-monthly"></canvas>
+                                <div id="chart-recruiter-placeholder" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 15px;">
+                                    <div style="text-align: center;">
+                                        <i class="fa-solid fa-chart-column" style="font-size: 40px; opacity: 0.15; display: block; margin-bottom: 12px;"></i>
+                                        Pilih perekrut di atas untuk melihat prestasi bulanan mereka
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
                         <!-- Interactive Data Table Section -->
                         <section class="card table-card">
                             <div class="table-header-row">

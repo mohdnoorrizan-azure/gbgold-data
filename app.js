@@ -82,6 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let chartRecruitmentTrend = null;
     let chartRecruitmentTopRecruiters = null;
     let chartRecruitmentSegmentDistribution = null;
+    let chartRecruiterMonthly = null;
+    let selectedRecruiterCode = null;
 
     // ==========================================
     // --- 3. DOM ELEMENTS ---
@@ -1365,7 +1367,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tableRecruitmentFilterMonth.value = 'all';
         tableRecruitmentSearch.value = '';
         currentRecruitmentPage = 1;
-
+        initRecruiterSelector();
         applyRecruitmentFilters();
     }
 
@@ -1555,6 +1557,181 @@ document.addEventListener('DOMContentLoaded', () => {
                     legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12 } }
                 },
                 cutout: '60%'
+            }
+        });
+    }
+
+    // --- New Recruiter Search & Dropdown Logic for Chart 4 ---
+    const recruiterSearchInput = document.getElementById('recruiter-search-input');
+    const recruiterSearchDropdown = document.getElementById('recruiter-search-dropdown');
+    const recruiterSelectedLabel = document.getElementById('recruiter-selected-label');
+    const chartRecruiterPlaceholder = document.getElementById('chart-recruiter-placeholder');
+
+    function initRecruiterSelector() {
+        if (!recruiterSearchInput) return;
+        
+        // Reset state
+        recruiterSearchInput.value = '';
+        recruiterSearchDropdown.style.display = 'none';
+        recruiterSelectedLabel.textContent = 'Sila pilih perekrut';
+        chartRecruiterPlaceholder.style.display = 'flex';
+        selectedRecruiterCode = null;
+        if (chartRecruiterMonthly) {
+            chartRecruiterMonthly.destroy();
+            chartRecruiterMonthly = null;
+        }
+
+        // Compile unique recruiters list from recruitmentData
+        const recruitersMap = new Map();
+        recruitmentData.forEach(r => {
+            if (!recruitersMap.has(r.code)) {
+                recruitersMap.set(r.code, r.name);
+            }
+        });
+        const recruitersList = Array.from(recruitersMap.entries()).map(([code, name]) => ({ code, name }));
+
+        // Handle input events to filter dropdown
+        recruiterSearchInput.oninput = () => {
+            const query = recruiterSearchInput.value.toLowerCase().trim();
+            if (!query) {
+                recruiterSearchDropdown.style.display = 'none';
+                return;
+            }
+
+            const filtered = recruitersList.filter(r => 
+                r.code.toLowerCase().includes(query) || 
+                r.name.toLowerCase().includes(query)
+            );
+
+            if (filtered.length === 0) {
+                recruiterSearchDropdown.innerHTML = '<div style="padding: 10px; color: var(--text-muted); font-size: 13px; text-align: center;">Tiada perekrut ditemui</div>';
+            } else {
+                recruiterSearchDropdown.innerHTML = filtered.map(r => `
+                    <div class="dropdown-item-recruiter" data-code="${r.code}" data-name="${r.name}" style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid rgba(15,23,42,0.04); font-size: 13px; transition: background 0.15s;">
+                        <strong style="color: var(--crimson);">${r.code}</strong> - <span>${r.name}</span>
+                    </div>
+                `).join('');
+                
+                // Add hover style and click event listeners
+                document.querySelectorAll('.dropdown-item-recruiter').forEach(item => {
+                    item.onmouseenter = () => { item.style.backgroundColor = 'rgba(15, 23, 42, 0.04)'; };
+                    item.onmouseleave = () => { item.style.backgroundColor = 'transparent'; };
+                    item.onclick = () => {
+                        const code = item.getAttribute('data-code');
+                        const name = item.getAttribute('data-name');
+                        selectRecruiterForChart(code, name);
+                    };
+                });
+            }
+            recruiterSearchDropdown.style.display = 'block';
+        };
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (recruiterSearchInput && !recruiterSearchInput.contains(e.target) && !recruiterSearchDropdown.contains(e.target)) {
+                recruiterSearchDropdown.style.display = 'none';
+            }
+        });
+
+        // Focus input to show all/filtered items
+        recruiterSearchInput.onfocus = () => {
+            if (recruiterSearchInput.value.trim()) {
+                recruiterSearchInput.oninput();
+            } else {
+                // Show top 20 list as default
+                const top20 = recruitersList.slice(0, 20);
+                recruiterSearchDropdown.innerHTML = top20.map(r => `
+                    <div class="dropdown-item-recruiter" data-code="${r.code}" data-name="${r.name}" style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid rgba(15,23,42,0.04); font-size: 13px; transition: background 0.15s;">
+                        <strong style="color: var(--crimson);">${r.code}</strong> - <span>${r.name}</span>
+                    </div>
+                `).join('');
+                
+                document.querySelectorAll('.dropdown-item-recruiter').forEach(item => {
+                    item.onmouseenter = () => { item.style.backgroundColor = 'rgba(15, 23, 42, 0.04)'; };
+                    item.onmouseleave = () => { item.style.backgroundColor = 'transparent'; };
+                    item.onclick = () => {
+                        const code = item.getAttribute('data-code');
+                        const name = item.getAttribute('data-name');
+                        selectRecruiterForChart(code, name);
+                    };
+                });
+                recruiterSearchDropdown.style.display = 'block';
+            }
+        };
+    }
+
+    function selectRecruiterForChart(code, name) {
+        selectedRecruiterCode = code;
+        recruiterSearchInput.value = '';
+        recruiterSearchDropdown.style.display = 'none';
+        recruiterSelectedLabel.innerHTML = `Terpilih: <strong style="color: var(--crimson);">${code}</strong> (${name})`;
+        chartRecruiterPlaceholder.style.display = 'none';
+        renderRecruiterMonthlyChart(code);
+    }
+
+    function renderRecruiterMonthlyChart(code) {
+        const monthNames = ["Januari", "Februari", "Mac", "April", "Mei", "Jun", "Julai", "Ogos", "September", "Oktober", "November", "Disember"];
+        const monthlyMap = new Map();
+        for(let i = 1; i <= 12; i++) monthlyMap.set(String(i).padStart(2, '0'), 0);
+
+        // Find all records for this specific recruiter code
+        const recruiterRecords = recruitmentData.filter(r => r.code === code);
+
+        recruiterRecords.forEach(row => {
+            const [fy, fm] = row.from.split('-');
+            const [ty, tm] = row.to.split('-');
+            // Only count records where from and to are in the same month (accurate monthly data)
+            if (fy === ty && fm === tm) {
+                if (monthlyMap.has(fm)) {
+                    monthlyMap.set(fm, monthlyMap.get(fm) + row.referrals);
+                }
+            }
+        });
+
+        const tooltipConfig = {
+            backgroundColor: 'rgba(255, 255, 255, 0.96)',
+            titleColor: '#d97706',
+            titleFont: { size: 13, weight: 'bold' },
+            bodyColor: '#0f172a',
+            borderColor: 'rgba(15, 23, 42, 0.08)',
+            borderWidth: 1,
+            padding: 12,
+            cornerRadius: 8
+        };
+
+        const ctxRec = document.getElementById('chart-recruiter-monthly').getContext('2d');
+        if (chartRecruiterMonthly) chartRecruiterMonthly.destroy();
+
+        chartRecruiterMonthly = new Chart(ctxRec, {
+            type: 'bar',
+            data: {
+                labels: monthNames,
+                datasets: [{
+                    label: 'Bilangan Rujukan Peribadi',
+                    data: Array.from(monthlyMap.values()),
+                    backgroundColor: 'rgba(184, 150, 13, 0.85)',
+                    borderColor: '#B8960D',
+                    borderWidth: 1,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: false }, 
+                    tooltip: tooltipConfig 
+                },
+                scales: { 
+                    y: { 
+                        beginAtZero: true,
+                        grid: { color: 'rgba(15, 23, 42, 0.04)' },
+                        ticks: { stepSize: 1, precision: 0 }
+                    }, 
+                    x: { 
+                        grid: { display: false } 
+                    } 
+                }
             }
         });
     }
