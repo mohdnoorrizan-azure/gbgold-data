@@ -595,16 +595,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Recruitment Merge ---
     function mergeRecruitmentRows(existing, newRows) {
-        const merged = [...existing];
-        newRows.forEach(newRow => {
-            const index = merged.findIndex(r => r.code === newRow.code && r.from === newRow.from && r.to === newRow.to);
-            if (index !== -1) {
-                merged[index] = newRow; 
-            } else {
-                merged.push(newRow); 
-            }
+        // Key: code + year-month (from 'from' date)
+        // This allows re-uploading a full monthly report to OVERRIDE the partial one
+        const mergedMap = new Map();
+
+        existing.forEach(r => {
+            const ym = r.from.substring(0, 7); // e.g. "2026-07"
+            mergedMap.set(`${r.code}|${ym}`, r);
         });
-        return merged;
+
+        newRows.forEach(newRow => {
+            const ym = newRow.from.substring(0, 7);
+            // Always override existing entry for same code + same year-month
+            mergedMap.set(`${newRow.code}|${ym}`, newRow);
+        });
+
+        return Array.from(mergedMap.values());
     }
 
     // ==========================================
