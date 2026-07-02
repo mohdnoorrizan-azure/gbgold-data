@@ -255,12 +255,30 @@ document.addEventListener('DOMContentLoaded', () => {
         Promise.all(promises)
             .then(allDataSets => {
                 const combinedRows = [].concat(...allDataSets);
-                uploadedRawRecruitmentRows = cleanRecruitmentData(combinedRows);
-                
+                const allCleaned = cleanRecruitmentData(combinedRows);
+
+                // Separate same-month (valid) vs multi-month (consolidated/invalid)
+                const sameMonthRows = allCleaned.filter(r => {
+                    const [fy, fm] = r.from.split('-');
+                    const [ty, tm] = r.to.split('-');
+                    return fy === ty && fm === tm;
+                });
+                const multiMonthRows = allCleaned.filter(r => {
+                    const [fy, fm] = r.from.split('-');
+                    const [ty, tm] = r.to.split('-');
+                    return fy !== ty || fm !== tm;
+                });
+
+                uploadedRawRecruitmentRows = allCleaned;
+
                 if (uploadedRawRecruitmentRows.length > 0) {
                     btnRecruitmentProcess.removeAttribute('disabled');
                     const totalSize = filesArray.reduce((acc, f) => acc + f.size, 0);
-                    recruitmentFileInfo.textContent = `${filesArray.length} fail (${formatBytes(totalSize)}) - Sedia diproses`;
+                    let msg = `${filesArray.length} fail (${formatBytes(totalSize)}) - Sedia diproses`;
+                    if (multiMonthRows.length > 0) {
+                        msg += ` ⚠️ ${multiMonthRows.length} rekod laporan pelbagai bulan akan diabaikan dalam carta trend`;
+                    }
+                    recruitmentFileInfo.textContent = msg;
                 } else {
                     throw new Error("Tiada data rekrutmen sah yang dijumpai dalam fail.");
                 }
@@ -1427,16 +1445,15 @@ document.addEventListener('DOMContentLoaded', () => {
         for(let i = 1; i <= 12; i++) monthlyMap.set(String(i).padStart(2, '0'), 0);
         
         filteredRecruitmentData.forEach(row => {
-            const fromMonth = row.from.split('-')[1];
-            const fromYear  = row.from.split('-')[0];
-            const toMonth   = row.to.split('-')[1];
-            const toYear    = row.to.split('-')[0];
+            const [fy, fm] = row.from.split('-');
+            const [ty, tm] = row.to.split('-');
 
-            // Same month → use that month; multi-month range → use the 'to' month
-            const m = (fromMonth === toMonth && fromYear === toYear) ? fromMonth : toMonth;
-
-            if (monthlyMap.has(m)) {
-                monthlyMap.set(m, monthlyMap.get(m) + row.referrals);
+            // Only count records where from and to are in the SAME month (accurate monthly data)
+            // Multi-month consolidated records are excluded from the trend chart
+            if (fy === ty && fm === tm) {
+                if (monthlyMap.has(fm)) {
+                    monthlyMap.set(fm, monthlyMap.get(fm) + row.referrals);
+                }
             }
         });
 
