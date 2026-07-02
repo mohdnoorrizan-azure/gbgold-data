@@ -215,32 +215,73 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Files Selection Processors (CSV / XLSX Parser) ---
+    const uploadedGbsFiles = new Map();
+    const uploadedRetailFiles = new Map();
+    const uploadedRecruitmentFiles = new Map();
+
     function handleFilesSelect(files, type) {
         const fileInfoSpan = type === 'gbs' ? gbsFileInfo : retailFileInfo;
         const dropZone = type === 'gbs' ? dropZoneGbs : dropZoneRetail;
+        const targetMap = type === 'gbs' ? uploadedGbsFiles : uploadedRetailFiles;
         
         const filesArray = Array.from(files);
         if (filesArray.length === 0) return;
         
-        fileInfoSpan.textContent = `${filesArray.length} fail terpilih...`;
+        fileInfoSpan.textContent = `Membaca fail...`;
         dropZone.classList.add('has-file');
         
-        const promises = filesArray.map(file => parseSingleFile(file));
+        const promises = filesArray.map(file => {
+            return parseSingleFile(file).then(jsonData => {
+                return { name: file.name, data: jsonData, size: file.size };
+            });
+        });
         
         Promise.all(promises)
-            .then(allDataSets => {
-                const combinedRows = [].concat(...allDataSets);
-                processParsedSalesData(combinedRows, type);
+            .then(results => {
+                results.forEach(res => {
+                    const cleaned = type === 'gbs' ? cleanGbsData(res.data) : cleanRetailData(res.data);
+                    targetMap.set(res.name, { cleaned, size: res.size });
+                });
+
+                // Re-compile gbsData / retailData from the map
+                let allRows = [];
+                let totalSize = 0;
+                targetMap.forEach(val => {
+                    allRows = allRows.concat(val.cleaned);
+                    totalSize += val.size;
+                });
+
+                // Deduplicate by date (later file overrides)
+                const dateMap = new Map();
+                allRows.forEach(row => {
+                    dateMap.set(row.date, row);
+                });
+
+                const finalRows = Array.from(dateMap.values()).sort((a,b) => a.date.localeCompare(b.date));
+
+                if (type === 'gbs') {
+                    gbsData = finalRows;
+                } else {
+                    retailData = finalRows;
+                }
                 
-                const totalSize = filesArray.reduce((acc, f) => acc + f.size, 0);
-                fileInfoSpan.textContent = `${filesArray.length} fail (${formatBytes(totalSize)})`;
+                if (gbsData && gbsData.length > 0 && retailData && retailData.length > 0) {
+                    btnProcess.removeAttribute('disabled');
+                }
+
+                fileInfoSpan.textContent = `${targetMap.size} fail terpilih (${formatBytes(totalSize)})`;
             })
             .catch(err => {
                 alert(err.message);
                 fileInfoSpan.textContent = 'Sila pilih atau tarik satu atau lebih fail ke sini';
                 dropZone.classList.remove('has-file');
-                if (type === 'gbs') gbsData = null;
-                else retailData = null;
+                if (type === 'gbs') {
+                    uploadedGbsFiles.clear();
+                    gbsData = null;
+                } else {
+                    uploadedRetailFiles.clear();
+                    retailData = null;
+                }
                 btnProcess.setAttribute('disabled', 'true');
             });
     }
@@ -249,34 +290,53 @@ document.addEventListener('DOMContentLoaded', () => {
         const filesArray = Array.from(files);
         if (filesArray.length === 0) return;
         
-        recruitmentFileInfo.textContent = `${filesArray.length} fail terpilih...`;
+        recruitmentFileInfo.textContent = `Membaca fail...`;
         dropZoneRecruitment.classList.add('has-file');
         
-        const promises = filesArray.map(file => parseSingleFile(file));
+        const promises = filesArray.map(file => {
+            return parseSingleFile(file).then(jsonData => {
+                return { name: file.name, data: jsonData, size: file.size };
+            });
+        });
         
         Promise.all(promises)
-            .then(allDataSets => {
-                const combinedRows = [].concat(...allDataSets);
-                const allCleaned = cleanRecruitmentData(combinedRows);
+            .then(results => {
+                results.forEach(res => {
+                    const cleaned = cleanRecruitmentData(res.data);
+                    uploadedRecruitmentFiles.set(res.name, { cleaned, size: res.size });
+                });
 
-                // Separate same-month (valid) vs multi-month (consolidated/invalid)
-                const sameMonthRows = allCleaned.filter(r => {
+                let allRows = [];
+                let totalSize = 0;
+                uploadedRecruitmentFiles.forEach(val => {
+                    allRows = allRows.concat(val.cleaned);
+                    totalSize += val.size;
+                });
+
+                // Deduplicate by code + year-month
+                const mergedMap = new Map();
+                allRows.forEach(row => {
+                    const ym = row.from.substring(0, 7);
+                    mergedMap.set(`${row.code}|${ym}`, row);
+                });
+
+                uploadedRawRecruitmentRows = Array.from(mergedMap.values());
+                
+                // Separate same-month vs multi-month
+                const sameMonthRows = uploadedRawRecruitmentRows.filter(r => {
                     const [fy, fm] = r.from.split('-');
                     const [ty, tm] = r.to.split('-');
                     return fy === ty && fm === tm;
                 });
-                const multiMonthRows = allCleaned.filter(r => {
+                const multiMonthRows = uploadedRawRecruitmentRows.filter(r => {
                     const [fy, fm] = r.from.split('-');
                     const [ty, tm] = r.to.split('-');
                     return fy !== ty || fm !== tm;
                 });
 
-                uploadedRawRecruitmentRows = allCleaned;
-
                 if (uploadedRawRecruitmentRows.length > 0) {
                     btnRecruitmentProcess.removeAttribute('disabled');
-                    const totalSize = filesArray.reduce((acc, f) => acc + f.size, 0);
-                    let msg = `${filesArray.length} fail (${formatBytes(totalSize)}) - Sedia diproses`;
+                    let msg = `${uploadedRecruitmentFiles.size} fail terpilih (${formatBytes(totalSize)}) - Sedia diproses`;
                     if (multiMonthRows.length > 0) {
                         msg += ` ⚠️ ${multiMonthRows.length} rekod laporan pelbagai bulan akan diabaikan dalam carta trend`;
                     }
@@ -289,6 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert(err.message);
                 recruitmentFileInfo.textContent = 'Sila pilih atau tarik satu atau lebih fail ke sini';
                 dropZoneRecruitment.classList.remove('has-file');
+                uploadedRecruitmentFiles.clear();
                 uploadedRawRecruitmentRows = [];
                 btnRecruitmentProcess.setAttribute('disabled', 'true');
             });
@@ -624,6 +685,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
         mergeSalesDatasets();
         
+        // Clear maps so state resets for next upload
+        uploadedGbsFiles.clear();
+        uploadedRetailFiles.clear();
+        
         fileGbsInput.value = '';
         fileRetailInput.value = '';
         gbsFileInfo.textContent = 'Sila pilih atau tarik satu atau lebih fail ke sini';
@@ -642,6 +707,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         recruitmentData = mergeRecruitmentRows(recruitmentData, uploadedRawRecruitmentRows);
         uploadedRawRecruitmentRows = [];
+        
+        // Clear map so state resets for next upload
+        uploadedRecruitmentFiles.clear();
         
         fileRecruitmentInput.value = '';
         recruitmentFileInfo.textContent = 'Sila pilih atau tarik satu atau lebih fail ke sini';
